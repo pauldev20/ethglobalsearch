@@ -2,6 +2,7 @@ import psycopg2
 import elasticsearch
 from elasticsearch import NotFoundError
 from openai import AsyncOpenAI
+import tiktoken
 
 
 INDEX = "documents"
@@ -39,16 +40,32 @@ MAPPING = {
 async def generate_embedding(openai_client: AsyncOpenAI,
                              text: str) -> list[float]:
     """Generate an embedding for the given text."""
-    # limit to 8000 tokens
-    if len(text) > 8000 * 3:
-        text = text[:8000 * 3]
+    # Use tiktoken to count tokens accurately
+    encoding = tiktoken.encoding_for_model("text-embedding-3-small")
+    MAX_TOKENS = 8000  # Stay under 8192 limit
+    
+    tokens = encoding.encode(text)
+    if len(tokens) > MAX_TOKENS:
+        # Truncate tokens and decode back to text
+        truncated_tokens = tokens[:MAX_TOKENS]
+        text = encoding.decode(truncated_tokens)
+    
     while True:
         try:
             response = await openai_client.embeddings.create(
                 model="text-embedding-3-small", input=text)
             return response.data[0].embedding
-        except:
-            text = text[:len(text)/2]
+        except Exception as e:
+            # If we still get a token limit error, reduce further
+            if "maximum context length" in str(e) or "tokens" in str(e):
+                tokens = encoding.encode(text)
+                new_max = int(len(tokens) * 0.8)
+                if new_max < 100:
+                    raise ValueError(f"Text too long even after truncation: {e}")
+                truncated_tokens = tokens[:new_max]
+                text = encoding.decode(truncated_tokens)
+            else:
+                raise
 
 
 

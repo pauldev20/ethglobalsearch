@@ -12,5 +12,6 @@ dependencies = [
     "openai>=2.8.1",
     "psycopg2>=2.9.11",
     "pydantic>=2.12.4",
+    "tiktoken>=0.12.0",
     "uvicorn>=0.38.0",
 ]
