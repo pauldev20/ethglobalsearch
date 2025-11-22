@@ -2,7 +2,7 @@
 /*                                 Interfaces                                 */
 /* -------------------------------------------------------------------------- */
 
-interface Prize {
+export interface Prize {
 	project_uuid: string;
 	name: string;
 	pool_prize: string;
@@ -70,6 +70,11 @@ export interface GraphData {
 	}[];
 }
 
+export interface ChatResponse {
+	message: string;
+	projects: Project[];
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                 Endpoints                                 */
 /* -------------------------------------------------------------------------- */
@@ -134,5 +139,15 @@ export const getGraph = async (query: string, events: string, types: string, org
 		next: { revalidate: 300 },
 	});
 	const data: GraphData = await response.json();
+	return data;
+};
+
+export const queryChat = async (query: string) => {
+	const response = await fetch(`${API_URL}/chat`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ query }),
+	});
+	const data: ChatResponse = await response.json();
 	return data;
 };
