@@ -7,7 +7,7 @@ export async function ProjectsGrid({ query, page, events, types, organizations }
 	let data = null;
 	let pagination = null;
 	if (query != undefined && page != undefined && events != undefined && types != undefined && organizations != undefined) {
-		const jsonData: SearchResponse | [] = await searchProjects(query, page, 50, events, types, organizations);
+		const jsonData: SearchResponse | [] = await searchProjects(query, page, 30, events, types, organizations);
 		data = jsonData.results;
 		pagination = jsonData.pagination;
 	}

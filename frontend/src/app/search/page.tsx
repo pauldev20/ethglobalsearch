@@ -1,4 +1,3 @@
-import { PaginationComponent } from "./Pagination";
 import { ProjectsGrid } from "./ProjectsGrid";
 import { SearchHeader } from "./SearchHeader";
 import { getTypes } from "@/lib/api";
@@ -24,8 +23,8 @@ export default async function Search(props: {
 	const typesData = await getTypes();
 
     return (
-        <main className="w-full min-h-full">
-			<SearchHeader typesData={typesData} />
+        <main className="flex-1 w-full min-h-full">
+			<SearchHeader typesData={typesData} query={query} events={events} types={types} organizations={organizations} />
 
 			{/* Projects Grid */}
 			<div className="max-w-7xl mx-auto px-4 pb-8">

@@ -56,6 +56,15 @@ export function Navbar() {
 								<span>Search</span>
 							</a>
 						</li>
+						<li className="group relative text-left">
+							<a
+								className="block items-center space-x-3 py-2.5 text-lg font-medium transition-opacity hover:opacity-60"
+								href="/chat"
+								onClick={() => setMobileMenuOpen(false)}
+							>
+								<span>Ask Talwar</span>
+							</a>
+						</li>
 					</div>
 				</ul>
 
@@ -69,6 +78,11 @@ export function Navbar() {
 					<li className="font-medium transition-opacity hover:opacity-60 lg:text-[1.1rem]">
 						<a href="/search">
 							<span>Search</span>
+						</a>
+					</li>
+					<li className="font-medium transition-opacity hover:opacity-60 lg:text-[1.1rem]">
+						<a href="/chat">
+							<span>Ask Talwar</span>
 						</a>
 					</li>
 				</ul>
