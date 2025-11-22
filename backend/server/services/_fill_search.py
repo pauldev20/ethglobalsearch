@@ -107,6 +107,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
             prizes_map[project_uuid]["orgs"].add(sponsor_org)
 
     for uuid, name, tagline, description, how_its_made, event_name in projects:
+        print(uuid)
         existing = await fetch_existing_doc(es, uuid)
 
         # Get prize data for this project
