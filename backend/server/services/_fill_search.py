@@ -37,36 +37,25 @@ MAPPING = {
 }
 
 
+def shorten_text(text: str) -> str:
+    encoding = tiktoken.encoding_for_model("text-embedding-3-small")
+    MAX_TOKENS = 8000
+    tokens = encoding.encode(text)
+    if len(tokens) > MAX_TOKENS:
+        truncated_tokens = tokens[:MAX_TOKENS]
+        return encoding.decode(truncated_tokens)
+    return text
+
+
 async def generate_embedding(openai_client: AsyncOpenAI,
                              text: str) -> list[float]:
     """Generate an embedding for the given text."""
-    # Use tiktoken to count tokens accurately
-    encoding = tiktoken.encoding_for_model("text-embedding-3-small")
-    MAX_TOKENS = 8000  # Stay under 8192 limit
-    
-    tokens = encoding.encode(text)
-    if len(tokens) > MAX_TOKENS:
-        # Truncate tokens and decode back to text
-        truncated_tokens = tokens[:MAX_TOKENS]
-        text = encoding.decode(truncated_tokens)
-    
-    while True:
-        try:
-            response = await openai_client.embeddings.create(
-                model="text-embedding-3-small", input=text)
-            return response.data[0].embedding
-        except Exception as e:
-            # If we still get a token limit error, reduce further
-            if "maximum context length" in str(e) or "tokens" in str(e):
-                tokens = encoding.encode(text)
-                new_max = int(len(tokens) * 0.8)
-                if new_max < 100:
-                    raise ValueError(f"Text too long even after truncation: {e}")
-                truncated_tokens = tokens[:new_max]
-                text = encoding.decode(truncated_tokens)
-            else:
-                raise
-
+    try:
+        response = await openai_client.embeddings.create(
+            model="text-embedding-3-small", input=text)
+        return response.data[0].embedding
+    except Exception as e:
+        return [0]
 
 
 async def ensure_index(es: elasticsearch.Elasticsearch):
@@ -129,6 +118,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
         # prepare full text for embedding
         parts = [name, tagline, description, how_its_made]
         full_text = "\n".join(filter(None, parts))
+        full_text = shorten_text(full_text)
 
         # Check if we can reuse the existing embedding
         should_reuse_embedding = False
@@ -139,7 +129,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
             original_parts.append(existing['_source'].get('description', ''))
             original_parts.append(existing['_source'].get('how_its_made', ''))
             original_full_text = "\n".join(original_parts)
-
+            original_full_text = shorten_text(original_full_text)
             # Reuse embedding if text hasn't changed and embedding exists
             if original_full_text == full_text and existing['_source'].get(
                     'raw_embedding') is not None:

@@ -17,16 +17,16 @@ scheduler = AsyncIOScheduler()
 async def update_projects(db: psycopg2.extensions.connection,
                           es: elasticsearch.Elasticsearch,
                           openai_client: AsyncOpenAI):
-    hackathons = await download_hackathons()
-    additional = ["trifecta-tee", "trifecta-zk", "trifecta-agents"]
-    hackathons.extend([{"slug": h} for h in additional])
-    for h in hackathons:
-        print(h)
-        projects = await download_projects(h["slug"])
-        print(f"Downloaded {len(projects)} projects for hackathon {h['slug']}")
-        if len(projects) > 0:
-            count = fill_db(db, projects)
-            print(f"Successfully loaded {count} projects into the database!")
+    # hackathons = await download_hackathons()
+    # additional = ["trifecta-tee", "trifecta-zk", "trifecta-agents"]
+    # hackathons.extend([{"slug": h} for h in additional])
+    # for h in hackathons:
+    #     print(h)
+    #     projects = await download_projects(h["slug"])
+    #     print(f"Downloaded {len(projects)} projects for hackathon {h['slug']}")
+    #     if len(projects) > 0:
+    #         count = fill_db(db, projects)
+    #         print(f"Successfully loaded {count} projects into the database!")
     print("Filling search")
     count = await fill_search(db, es, openai_client)
     print(f"Successfully loaded {count} projects into Elasticsearch!")

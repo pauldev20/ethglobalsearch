@@ -19,10 +19,10 @@ async def knn_search(es: AsyncElasticsearch, index: str, embedding):
         knn={
             "field": "embedding",
             "query_vector": embedding,
-            "k": 100,
-            "num_candidates": 500,
+            "k": 30,
+            "num_candidates": 100,
         },
-        size=100,
+        size=30,
     )
 
 
@@ -52,7 +52,7 @@ async def process_one(uuid_1: str, es: AsyncElasticsearch, index: str,
 async def fill_similarity(
         db_connection: psycopg2.extensions.connection,
         es: AsyncElasticsearch,
-        threshold: float = 0.5,  # lowered threshold
+        threshold: float = 0.3,  # lowered threshold
         batch_size: int = 50  # concurrency level
 ):
 
