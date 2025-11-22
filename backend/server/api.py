@@ -44,12 +44,19 @@ class SearchQuery(BaseModel):
     prize_type: Optional[List[str]] = None
     sponsor_organization: Optional[List[str]] = None
     query: Optional[str] = None
+    page: Optional[int] = 1
+    page_size: Optional[int] = 12
 
 @router.post("/search")
 def search(q: SearchQuery,
            db: psycopg2.extensions.connection = Depends(get_db),
            es: elasticsearch.Elasticsearch = Depends(get_es)):
     INDEX = "documents"
+    
+    # Pagination parameters
+    page = max(1, q.page or 1)
+    page_size = max(1, min(100, q.page_size or 12))  # Limit max page_size to 100
+    from_offset = (page - 1) * page_size
 
     # Build Elasticsearch bool query with all filters
     must_clauses = []
@@ -97,7 +104,7 @@ def search(q: SearchQuery,
         # If no filters, match all
         es_query = {"match_all": {}}
 
-    # Execute Elasticsearch query
+    # Execute Elasticsearch query with pagination
     res = es.search(
         index=INDEX,
         query=es_query,
@@ -109,8 +116,12 @@ def search(q: SearchQuery,
                 "how_its_made": {}
             }
         },
-        size=1000  # Increase size to get all matching results
+        from_=from_offset,
+        size=page_size
     )
+
+    # Get total count
+    total_hits = res["hits"]["total"]["value"] if isinstance(res["hits"]["total"], dict) else res["hits"]["total"]
 
     # Extract results
     es_result_ids = []
@@ -188,7 +199,15 @@ def search(q: SearchQuery,
     # Sort by Elasticsearch score (descending), items without score go last
     response.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-    return response
+    return {
+        "results": response,
+        "pagination": {
+            "page": page,
+            "page_size": page_size,
+            "total": total_hits,
+            "total_pages": (total_hits + page_size - 1) // page_size if total_hits > 0 else 0
+        }
+    }
 
 @router.get("/similar")
 def similar(uuid: str,
