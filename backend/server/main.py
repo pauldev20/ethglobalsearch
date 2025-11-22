@@ -4,6 +4,7 @@ import fastapi
 import psycopg2
 import elasticsearch
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 from api import router
 from services.scheduler import start_scheduler
@@ -31,6 +32,15 @@ async def lifespan(app: fastapi.FastAPI):
 
 
 app = fastapi.FastAPI(lifespan=lifespan)
+
+# Add CORS middleware to allow all origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(router)
 
