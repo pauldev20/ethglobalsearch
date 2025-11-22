@@ -1,4 +1,4 @@
 #!/bin/bash
-curl -X POST http://localhost:8000/graph \
+curl -X POST http://localhost:8000/graph?threshold=0.78 \
   -H "Content-Type: application/json" \
-  -d '{"query": "Im looking for a project that built something like a facebook clone"}' | jq
+  -d '{"query": ""}' | jq
