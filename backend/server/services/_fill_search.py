@@ -146,7 +146,6 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
         except Exception as e:
             print(f"Error indexing document {uuid}: {e}")
             raise
-        break
 
     # Refresh the index once after all documents are indexed
     try:
