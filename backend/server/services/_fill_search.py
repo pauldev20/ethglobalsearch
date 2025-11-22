@@ -117,12 +117,14 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
             original_full_text = "\n".join(original_parts)
 
             # Reuse embedding if text hasn't changed and embedding exists
-            if original_full_text == full_text and existing['_source'].get('embedding') is not None:
+            if original_full_text == full_text and existing['_source'].get(
+                    'raw_embedding') is not None:
                 should_reuse_embedding = True
-                embedding = existing['_source']['embedding']
+                embedding = existing['_source']['raw_embedding']
 
         # Generate new embedding if we can't reuse
         if not should_reuse_embedding:
+            print("Generating new embedding, uuid: ", uuid)
             embedding = await generate_embedding(openai_client, full_text)
 
         # Always build and index the document with all current fields
@@ -140,9 +142,6 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
         try:
             # Index the document with refresh=False for better performance
             result = es.index(index=INDEX, id=uuid, document=doc, refresh=True)
-            print(
-                f"Indexed document {uuid}, result: {result.get('result', 'unknown')}"
-            )
         except Exception as e:
             print(f"Error indexing document {uuid}: {e}")
             raise
@@ -150,7 +149,6 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
     # Refresh the index once after all documents are indexed
     try:
         es.indices.refresh(index=INDEX)
-        print("Index refreshed successfully")
     except Exception as e:
         print(f"Error refreshing index: {e}")
         raise
