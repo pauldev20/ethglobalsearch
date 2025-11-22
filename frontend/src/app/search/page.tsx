@@ -1,7 +1,9 @@
+import { PaginationComponent } from "./Pagination";
 import { ProjectsGrid } from "./ProjectsGrid";
 import { SearchHeader } from "./SearchHeader";
 import { getTypes } from "@/lib/api";
 import { Suspense } from "react";
+
 
 export default async function Search(props: {
   searchParams?: Promise<{
@@ -30,11 +32,6 @@ export default async function Search(props: {
 				<Suspense key={query + currentPage + events + types + organizations} fallback={<ProjectsGrid />}>
 					<ProjectsGrid query={query} page={currentPage} events={events} types={types} organizations={organizations} />
 				</Suspense>
-
-				{/* Pagination */}
-				<div className="mt-12 flex justify-center">
-					{/* <PaginationComponent currentPage={currentPage} totalPages={totalPages} handlePageChange={handlePageChange} /> */}
-				</div>
 			</div>
         </main>
     );

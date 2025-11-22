@@ -24,7 +24,6 @@ export default async function ProjectPage({
 }) {
   const { id } = await params;
   const project: Project = await getProject(id);
-
   if (!project) notFound();
 
   const demoUrl = undefined;
