@@ -1,12 +1,13 @@
 import uvicorn
-from fastapi import FastAPI
+import fastapi
 import psycopg2
-from elasticsearch import Elasticsearch
+import elasticsearch
 import os
+
 from api import router
 from services.scheduler import start_scheduler
 
-app = FastAPI()
+app = fastapi.FastAPI()
 
 app.include_router(router)
 
@@ -16,11 +17,11 @@ ES_URL = os.getenv("ES_URL", "http://localhost:9200")
 @app.on_event("startup")
 async def startup_event():
     db = psycopg2.connect(DB_URL)
-    es = Elasticsearch(ES_URL)
-    # Store in app state for dependency injection
+    es = elasticsearch.Elasticsearch(ES_URL)
     app.state.db = db
     app.state.es = es
     await start_scheduler(db=db, es=es)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = os.environ.get("PORT", 8000)
+    uvicorn.run(app, host="0.0.0.0", port=port)

@@ -10,7 +10,9 @@ from ._fill_search import fill_search
 
 scheduler = AsyncIOScheduler()
 
-async def update_projects(db: psycopg2.extensions.connection, es: elasticsearch.Elasticsearch):
+
+async def update_projects(db: psycopg2.extensions.connection,
+                          es: elasticsearch.Elasticsearch):
     projects = await download_projects()
     print(f"Downloaded {len(projects)} projects")
     count = fill_db(db, projects)
