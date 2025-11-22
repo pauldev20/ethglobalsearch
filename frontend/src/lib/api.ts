@@ -39,6 +39,12 @@ export interface SearchResponse {
 	};
 }
 
+export interface TypesResponse {
+	types: string[];
+	event_names: string[];
+	sponsor_organizations: string[];
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                 Endpoints                                 */
 /* -------------------------------------------------------------------------- */
@@ -61,13 +67,28 @@ export const getProject = async (uuid: string) => {
 	return data;
 };
 
-export const searchProjects = async (query: string, page: number, page_size: number) => {
+export const searchProjects = async (query: string, page: number, page_size: number, events?: string, types?: string, organizations?: string) => {
 	const response = await fetch(`${API_URL}/search`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ query, page, page_size }),
+		body: JSON.stringify({
+			query,
+			page,
+			page_size,
+			...(organizations ? { sponsor_organization: organizations.split(',') } : {}),
+			...(types ? { prize_type: types.split(',') } : {}),
+			...(events ? { event_name: events.split(',') } : {})
+		}),
 		next: { revalidate: 300 },
 	});
 	const data: SearchResponse = await response.json();
+	return data;
+};
+
+export const getTypes = async () => {
+	const response = await fetch(`${API_URL}/types`, {
+		next: { revalidate: 300 },
+	});
+	const data: TypesResponse = await response.json();
 	return data;
 };
