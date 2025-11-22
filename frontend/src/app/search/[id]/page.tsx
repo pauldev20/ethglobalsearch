@@ -19,8 +19,6 @@ export default async function ProjectPage({
   const project: Project = await getProject(id);
   if (!project) notFound();
 
-  const demoUrl = undefined;
-
   return (
     <main className="min-h-screen w-full pb-8">
       <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 space-y-8">
@@ -54,11 +52,11 @@ export default async function ProjectPage({
              </div>
 
              {/* Right: CTAs - Desktop only */}
-             {(demoUrl || project.source_code_url) && (
+             {(project.url || project.source_code_url) && (
                <div className="hidden sm:flex gap-3 shrink-0">
-                 {demoUrl && (
+                 {project.url && (
                    <Button asChild size="default" className="gap-2">
-                     <a href={demoUrl} target="_blank" rel="noopener noreferrer">
+                     <a href={project.url} target="_blank" rel="noopener noreferrer">
                        <FontAwesomeIcon icon={faGlobe} className="h-4 w-4" />
                        <span>Live Demo</span>
                      </a>
@@ -89,19 +87,20 @@ export default async function ProjectPage({
                    variant="default"
                    className="gap-1 px-2 py-1 text-xs"
                  >
-                   <span>{prize.emoji}</span>
-                   <span>{prize.detail}</span>
+					{prize.prize_emoji && <span>{prize.prize_emoji}</span>}
+					{!prize.prize_emoji && <img src={prize.sponsor_organization_square_logo_url} alt={prize.sponsor_name} className="h-4 w-4 rounded-full" />}
+                   	<span>{prize.sponsor_name} - {prize.name}</span>
                  </Badge>
                ))}
              </div>
            )}
 
            {/* Mobile CTAs - Full Width */}
-           {(demoUrl || project.source_code_url) && (
+           {(project.url || project.source_code_url) && (
              <div className="flex flex-col gap-2 sm:hidden">
-               {demoUrl && (
+               {project.url && (
                  <Button asChild size="lg" className="w-full gap-2">
-                   <a href={demoUrl} target="_blank" rel="noopener noreferrer">
+                   <a href={project.url} target="_blank" rel="noopener noreferrer">
                      <FontAwesomeIcon icon={faGlobe} className="h-4 w-4" />
                      <span>Live Demo</span>
                    </a>

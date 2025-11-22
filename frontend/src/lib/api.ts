@@ -3,12 +3,15 @@
 /* -------------------------------------------------------------------------- */
 
 interface Prize {
+	project_uuid: string;
 	name: string;
-	detail: string;
-	emoji: string;
-	type: string;
-	sponsor: string;
-	sponsor_organization: string;
+	pool_prize: string;
+	prize_name: string;
+	prize_emoji: string;
+	prize_type: string;
+	sponsor_name: string;
+	sponsor_organization_name: string;
+	sponsor_organization_square_logo_url: string;
 }
 
 export interface Project {
