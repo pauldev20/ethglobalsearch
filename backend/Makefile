@@ -55,10 +55,18 @@ db-reset-dev:
 			-v $(PWD)/migration:/migration \
 			migrate/migrate -path=/migration -database $(DEV_DB_URL)/$(DB_NAME)?sslmode=disable up
 
+db-up-dev: 
+	@[ -n "${DEV_DB_URL}" ] || { echo "set DEV_DB_URL"; exit 1; }
+	docker run --rm \
+			-v $(PWD)/migration:/migration \
+			migrate/migrate -path=/migration -database $(DEV_DB_URL)/$(DB_NAME)?sslmode=disable up
+
+
 # elasticsearch
 es-docker:
 	docker run --rm --network devdbnetwork --name es -p 9200:9200 \
 		-e "discovery.type=single-node" \
 		-e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+		-e "ELASTIC_USERNAME=elastic" \
 		-e "ELASTIC_PASSWORD=changeme" \
 		-d elasticsearch:9.2.1
