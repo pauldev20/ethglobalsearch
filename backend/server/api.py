@@ -9,11 +9,6 @@ from services.scheduler import update_projects
 
 router = APIRouter(prefix="")
 
-class SearchQuery(BaseModel):
-    event_name: Optional[List[str]] = None
-    prize_type: Optional[List[str]] = None
-    sponsor_organization: Optional[List[str]] = None
-    query: Optional[str] = None
 
 def get_db(request: Request) -> psycopg2.extensions.connection:
     """Dependency to get database connection from app state"""
@@ -38,6 +33,12 @@ def get_types(db: psycopg2.extensions.connection = Depends(get_db)):
         "event_names": [event_name[0] for event_name in event_names],
         "sponsor_organizations": [sponsor_organization[0] for sponsor_organization in sponsor_organizations]
     }
+
+class SearchQuery(BaseModel):
+    event_name: Optional[List[str]] = None
+    prize_type: Optional[List[str]] = None
+    sponsor_organization: Optional[List[str]] = None
+    query: Optional[str] = None
 
 @router.get("/search")
 def search(q: SearchQuery,
@@ -192,3 +193,12 @@ def search(q: SearchQuery,
     response.sort(key=lambda x: x.get("score", 0), reverse=True)
 
     return response
+
+class ChatQuery(BaseModel):
+    query: str
+
+@router.get("/chat")
+def chat(q: ChatQuery,
+         db: psycopg2.extensions.connection = Depends(get_db),
+         es: elasticsearch.Elasticsearch = Depends(get_es)):
+    return {"message": "Hello, World!"}

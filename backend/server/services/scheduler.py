@@ -2,6 +2,7 @@ import asyncio
 import elasticsearch
 import psycopg2
 import json
+import os
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from openai import AsyncOpenAI
@@ -34,7 +35,14 @@ async def update_projects(db: psycopg2.extensions.connection,
     print(f"Successfully loaded {similarity_count} similarities into the database!")
 
 
-async def start_scheduler(db: psycopg2.extensions.connection, es: elasticsearch.Elasticsearch, openai_client: AsyncOpenAI):
+async def start_scheduler(db: psycopg2.extensions.connection,
+                          es: elasticsearch.Elasticsearch,
+                          openai_client: AsyncOpenAI):
+    if os.getenv("NO_UPDATE", "false") == "true":
+        return
     asyncio.create_task(update_projects(db, es, openai_client))
-    scheduler.add_job(update_projects, "interval", minutes=50, args=[db, es, openai_client])
+    scheduler.add_job(update_projects,
+                      "interval",
+                      minutes=50,
+                      args=[db, es, openai_client])
     scheduler.start()
