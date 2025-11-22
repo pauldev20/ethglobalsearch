@@ -1,4 +1,4 @@
 #!/bin/bash
-curl -X POST https://backend-production-1d3e.up.railway.app/search \
+curl -X GET http://localhost:8000/search \
   -H "Content-Type: application/json" \
-  -d '{"query": "tip"}' | jq
+  -d '{"prize_type": ["finalist"], "query": "synth"}' | jq

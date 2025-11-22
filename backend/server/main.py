@@ -7,7 +7,7 @@ import os
 
 from api import router
 from services.scheduler import start_scheduler
-
+from openai import AsyncOpenAI
 
 DB_URL = os.getenv("DB_URL", "postgresql://postgres:password@localhost:5432/search")
 ES_URL = os.getenv("ES_URL", "https://elastic:changeme@localhost:9200")
@@ -20,9 +20,10 @@ async def lifespan(app: fastapi.FastAPI):
         verify_certs=False,
         ssl_show_warn=False,
     )
+    openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     app.state.db = db
     app.state.es = es
-    await start_scheduler(db=db, es=es)
+    await start_scheduler(db=db, es=es, openai_client=openai_client)
     yield
     db.close()
     es.close()
