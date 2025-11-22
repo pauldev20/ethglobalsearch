@@ -2,7 +2,6 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useDebouncedCallback } from 'use-debounce';
 
 
 export function SelectFilter({ data, placeholder, queryParam }: { data: string[], placeholder: string, queryParam: string }) {
@@ -10,11 +9,12 @@ export function SelectFilter({ data, placeholder, queryParam }: { data: string[]
   	const pathname = usePathname();
   	const { replace } = useRouter();
 	
-	const handleSelect = useDebouncedCallback((value: string) => {
+	const handleSelect = (value: string) => {
 		const params = new URLSearchParams(searchParams);
 		params.set(queryParam, value);
+		params.delete('page');
 		replace(`${pathname}?${params.toString()}`);
-	}, 100);
+	};
 
 	return (
 		<Select onValueChange={handleSelect} value={searchParams.get(queryParam) ?? undefined}>

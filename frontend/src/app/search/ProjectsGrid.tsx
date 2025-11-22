@@ -1,4 +1,5 @@
 import { searchProjects, SearchResponse, Project } from "@/lib/api";
+import { PaginationComponent } from "./Pagination";
 import { ProjectCard } from "./ProjectCard";
 
 
@@ -45,6 +46,11 @@ export async function ProjectsGrid({ query, page, events, types, organizations }
 				</div>
 			)}
 			</div>
+
+			{/* Pagination */}
+			{(page && pagination?.total_pages) && <div className="mt-12 flex justify-center">
+				<PaginationComponent currentPage={page} totalPages={pagination.total_pages} />
+			</div>}
 		</>
 	);
 }
