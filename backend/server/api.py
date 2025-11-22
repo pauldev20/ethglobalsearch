@@ -216,6 +216,7 @@ def search(q: SearchQuery,
 
 @router.post("/graph")
 def graph(q: SearchQuery,
+          threshold: float = 0.5,
           db: psycopg2.extensions.connection = Depends(get_db),
           es: elasticsearch.Elasticsearch = Depends(get_es)):
     INDEX = "documents"
@@ -324,7 +325,8 @@ def graph(q: SearchQuery,
             FROM similarity
             WHERE uuid_1 IN ({similarity_placeholders})
             AND uuid_2 IN ({similarity_placeholders})
-            """, project_uuids + project_uuids)
+            AND similarity_score > %s
+            """, project_uuids + project_uuids + [threshold])
         
         for row in cur.fetchall():
             uuid_1, uuid_2, similarity_score = row
@@ -716,6 +718,6 @@ async def embeddings(q: EmbeddingsQuery,
         response.append(result)
 
     # Sort by similarity score (descending) to maintain order
-    response.sort(key=lambda x: x.get("similarity_score", 0), reverse=True)
+    response.sort(key=lambda x: x.get("similarity_score", 0),reverse=True)
 
     return response
