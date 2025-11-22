@@ -138,7 +138,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
 
         # Generate new embedding if we can't reuse
         if not should_reuse_embedding:
-            print("Generating new embedding, uuid: ", uuid)
+            print("Generating new embedding, uuid: ", uuid, flush=True)
             embedding = await generate_embedding(openai_client, full_text)
 
         # Always build and index the document with all current fields

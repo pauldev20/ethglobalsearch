@@ -27,10 +27,10 @@ async def update_projects(db: psycopg2.extensions.connection,
     #     if len(projects) > 0:
     #         count = fill_db(db, projects)
     #         print(f"Successfully loaded {count} projects into the database!")
-    print("Filling search")
+    print("Filling search", flush=True)
     count = await fill_search(db, es, openai_client)
     print(f"Successfully loaded {count} projects into Elasticsearch!")
-    print("Filling similarity")
+    print("Filling similarity", flush=True)
     similarity_count = await fill_similarity(db, es)
     print(f"Successfully loaded {similarity_count} similarities into the database!")
 
