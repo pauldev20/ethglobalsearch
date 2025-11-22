@@ -27,7 +27,7 @@ async def update_projects(db: psycopg2.extensions.connection,
         if len(projects) > 0:
             count = fill_db(db, projects)
             print(f"Successfully loaded {count} projects into the database!")
-    if os.get_env("UPDATE_DB", "false") == "true":
+    if os.getenv("UPDATE_DB", "false") == "true":
         print("Filling search", flush=True)
         count = await fill_search(db, es, openai_client)
         print(f"Successfully loaded {count} projects into Elasticsearch!")
