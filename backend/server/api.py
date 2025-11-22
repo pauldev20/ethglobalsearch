@@ -617,3 +617,105 @@ social media, messaging, social network, chat app, community platform, user prof
     response.sort(key=lambda x: x.get("similarity_score", 0), reverse=True)
 
     return response
+
+class EmbeddingsQuery(BaseModel):
+    keywords: str
+
+@router.post("/embeddings")
+async def embeddings(q: EmbeddingsQuery,
+                     db: psycopg2.extensions.connection = Depends(get_db),
+                     es: elasticsearch.Elasticsearch = Depends(get_es),
+                     openai_client: AsyncOpenAI = Depends(get_openai)):
+    INDEX = "documents"
+
+    # Step 1: Generate embedding for the user-provided keywords (no LLM chat step)
+    from services._fill_search import generate_embedding
+    embedding = await generate_embedding(openai_client, q.keywords)
+
+    # Step 2: Use KNN search to find similar projects (top 100)
+    res = es.search(
+        index=INDEX,
+        knn={
+            "field": "embedding",
+            "query_vector": embedding,
+            "k": 100,
+            "num_candidates": 500,
+        },
+        size=100,
+    )
+
+    # Extract results
+    es_result_ids = []
+    scores_map = {}
+    for hit in res["hits"]["hits"]:
+        es_result_ids.append(hit["_id"])
+        scores_map[hit["_id"]] = hit["_score"]
+
+    # If no results, return empty
+    if not es_result_ids:
+        return []
+
+    # Fetch full project data from database
+    placeholders = ','.join(['%s'] * len(es_result_ids))
+    cur = db.cursor()
+    cur.execute(
+        f"""
+        SELECT *
+        FROM project
+        WHERE uuid IN ({placeholders})
+        """, es_result_ids)
+    columns = [desc[0] for desc in cur.description]
+    projects = cur.fetchall()
+
+    # Fetch prizes for all matching projects
+    project_uuids = [project[0]
+                     for project in projects]  # uuid is first column
+    prizes_map = {}
+
+    if project_uuids:
+        prize_placeholders = ','.join(['%s'] * len(project_uuids))
+        cur.execute(
+            f"""
+            SELECT *
+            FROM prize
+            WHERE project_uuid IN ({prize_placeholders})
+        """, project_uuids)
+        
+        prize_columns = [desc[0] for desc in cur.description]
+        for row in cur.fetchall():
+            project_uuid = row[0]
+            if project_uuid not in prizes_map:
+                prizes_map[project_uuid] = []
+            prize_dict = dict(zip(prize_columns, row))
+            prizes_map[project_uuid].append({
+                "project_uuid": prize_dict["project_uuid"],
+                "name": prize_dict["name"],
+                "pool_prize": prize_dict["pool_prize"],
+                "prize_name": prize_dict["prize_name"],
+                "prize_emoji": prize_dict["prize_emoji"],
+                "prize_type": prize_dict["prize_type"],
+                "sponsor_name": prize_dict["sponsor_name"],
+                "sponsor_organization_name": prize_dict["sponsor_organization_name"],
+                "sponsor_organization_square_logo_url": prize_dict["sponsor_organization_square_logo_url"]
+            })
+
+    cur.close()
+
+    # Build response with full entries and similarity scores
+    response = []
+    for project in projects:
+        project_dict = dict(zip(columns, project))
+        uuid = project_dict["uuid"]
+
+        result = {**project_dict, "prizes": prizes_map.get(uuid, [])}
+
+        # Add similarity score from KNN search
+        if uuid in scores_map:
+            result["similarity_score"] = scores_map[uuid]
+
+        response.append(result)
+
+    # Sort by similarity score (descending) to maintain order
+    response.sort(key=lambda x: x.get("similarity_score", 0), reverse=True)
+
+    return response
