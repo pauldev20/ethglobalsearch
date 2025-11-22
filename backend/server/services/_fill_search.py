@@ -22,7 +22,7 @@ def fill_search(db_connection: psycopg2.extensions.connection, es: elasticsearch
 
     cur.execute("""
         SELECT uuid, name, tagline, description, how_its_made
-        FROM project
+        FROM search.project
     """)
     projects = cur.fetchall()
 

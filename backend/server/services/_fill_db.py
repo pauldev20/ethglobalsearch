@@ -16,7 +16,7 @@ def fill_db(db_connection: psycopg2.extensions.connection, projects: list[dict])
         
         # Insert or update project
         cur.execute("""
-            INSERT INTO project (uuid, slug, name, tagline, description, how_its_made, 
+            INSERT INTO search.project (uuid, slug, name, tagline, description, how_its_made, 
                                 source_code_url, event_name, logo_url, banner_url)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (uuid) DO UPDATE
@@ -46,7 +46,7 @@ def fill_db(db_connection: psycopg2.extensions.connection, projects: list[dict])
                 sponsor_org = prize_data.get("sponsor", {}).get("organization", {}).get("name", "") or ""
                 
                 cur.execute("""
-                    INSERT INTO prize (project_uuid, name, detail, emoji, type, sponsor, sponsor_organization)
+                    INSERT INTO search.prize (project_uuid, name, detail, emoji, type, sponsor, sponsor_organization)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (detail) DO UPDATE
                     SET name = EXCLUDED.name,
