@@ -23,6 +23,7 @@ async def lifespan(app: fastapi.FastAPI):
     openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     app.state.db = db
     app.state.es = es
+    app.state.openai_client = openai_client
     await start_scheduler(db=db, es=es, openai_client=openai_client)
     yield
     db.close()
