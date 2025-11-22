@@ -21,4 +21,4 @@ RUN uv sync --frozen --no-dev
 COPY server/ ./
 
 # Run the application
-CMD ["uv", "run", "python", "main.py"]
+CMD ["uv", "run", "main.py"]
