@@ -1,0 +1,48 @@
+query GetPaginatedSubmittedProjects(
+  $filters: ProjectFilters!
+  $pagination: Pagination!
+) {
+  getPaginatedSubmittedProjects(filters: $filters, pagination: $pagination) {
+    skip
+    items {
+      uuid
+      slug
+      name
+      tagline
+      description
+      howItsMade
+      sourceCodeUrl
+      event {
+        id
+        name
+      }
+      logo {
+        file {
+          path
+          fullUrl
+        }
+      }
+      banner {
+        file {
+          path
+          fullUrl
+        }
+      }
+      prizes {
+        name
+        prize {
+          name
+          emoji
+          type
+          sponsor {
+            name
+            organization {
+              name
+            }
+          }
+        }
+      }
+      meta
+    }
+  }
+}
