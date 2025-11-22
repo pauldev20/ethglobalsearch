@@ -41,8 +41,8 @@ async def start_scheduler(db: psycopg2.extensions.connection,
     if os.getenv("NO_UPDATE", "false") == "true":
         return
     asyncio.create_task(update_projects(db, es, openai_client))
-    scheduler.add_job(update_projects,
-                      "interval",
-                      minutes=50,
-                      args=[db, es, openai_client])
-    scheduler.start()
+    # scheduler.add_job(update_projects,
+    #                   "interval",
+    #                   minutes=50,
+    #                   args=[db, es, openai_client])
+    # scheduler.start()

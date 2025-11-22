@@ -82,13 +82,13 @@ def search(q: SearchQuery,
 
     # Filter by prize type
     if q.prize_type:
-        filter_clauses.append({"terms": {"prize_type": q.prize_type}})
+        filter_clauses.append({"terms": {"type": q.prize_type}})
 
     # Filter by sponsor_organization
     if q.sponsor_organization:
         filter_clauses.append(
             {"terms": {
-                "sponsor_organization_name": q.sponsor_organization
+                "sponsor_organization": q.sponsor_organization
             }})
 
     # Build the query
@@ -244,13 +244,13 @@ def graph(q: SearchQuery,
 
     # Filter by prize type
     if q.prize_type:
-        filter_clauses.append({"terms": {"prize_type": q.prize_type}})
+        filter_clauses.append({"terms": {"type": q.prize_type}})
 
     # Filter by sponsor_organization
     if q.sponsor_organization:
         filter_clauses.append(
             {"terms": {
-                "sponsor_organization_name": q.sponsor_organization
+                "sponsor_organization": q.sponsor_organization
             }})
 
     # Build the query
