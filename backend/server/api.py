@@ -209,6 +209,137 @@ def search(q: SearchQuery,
         }
     }
 
+@router.post("/graph")
+def graph(q: SearchQuery,
+          db: psycopg2.extensions.connection = Depends(get_db),
+          es: elasticsearch.Elasticsearch = Depends(get_es)):
+    INDEX = "documents"
+    
+    # Build Elasticsearch bool query with all filters (same as /search)
+    must_clauses = []
+    filter_clauses = []
+
+    # Text search query
+    if q.query:
+        must_clauses.append({
+            "multi_match": {
+                "query": q.query,
+                "fields":
+                ["name^5", "tagline^2", "description", "how_its_made"],
+                "type": "best_fields",
+                "operator": "or",
+                "fuzziness": "AUTO",
+                "minimum_should_match": "75%"
+            }
+        })
+
+    # Filter by event_name
+    if q.event_name:
+        filter_clauses.append({"terms": {"event_name": q.event_name}})
+
+    # Filter by prize type
+    if q.prize_type:
+        filter_clauses.append({"terms": {"type": q.prize_type}})
+
+    # Filter by sponsor_organization
+    if q.sponsor_organization:
+        filter_clauses.append(
+            {"terms": {
+                "sponsor_organization": q.sponsor_organization
+            }})
+
+    # Build the query
+    es_query = {}
+    if must_clauses or filter_clauses:
+        bool_query = {}
+        if must_clauses:
+            bool_query["must"] = must_clauses
+        if filter_clauses:
+            bool_query["filter"] = filter_clauses
+        es_query = {"bool": bool_query}
+    else:
+        # If no filters, match all
+        es_query = {"match_all": {}}
+
+    # Execute Elasticsearch query (no pagination for graph - get all matching)
+    res = es.search(
+        index=INDEX,
+        query=es_query,
+        size=10000  # Get up to 10k results for graph
+    )
+
+    # Extract result IDs
+    es_result_ids = []
+    for hit in res["hits"]["hits"]:
+        es_result_ids.append(hit["_id"])
+
+    # If no results, return empty graph
+    if not es_result_ids:
+        return {"nodes": [], "links": []}
+
+    # Fetch full project data from database
+    placeholders = ','.join(['%s'] * len(es_result_ids))
+    cur = db.cursor()
+    cur.execute(
+        f"""
+        SELECT *
+        FROM project
+        WHERE uuid IN ({placeholders})
+        """, es_result_ids)
+    columns = [desc[0] for desc in cur.description]
+    projects = cur.fetchall()
+
+    # Build nodes from projects
+    project_uuids = [project[0] for project in projects]  # uuid is first column
+    nodes = []
+    nodes_map = {}  # uuid -> node index for quick lookup
+    
+    # Fields to exclude
+    exclude_fields = {"slug", "tagline", "description", "how_its_made", "source_code_url", "logo_url", "banner_url"}
+    
+    for idx, project in enumerate(projects):
+        project_dict = dict(zip(columns, project))
+        uuid = project_dict["uuid"]
+        
+        # Create node with id field for force-graph, excluding specified fields
+        node = {"id": uuid}
+        for key, value in project_dict.items():
+            if key not in exclude_fields and key != "uuid":  # uuid is already added as "id"
+                node[key] = value
+        
+        nodes.append(node)
+        nodes_map[uuid] = idx
+
+    # Fetch similarity relationships between the filtered projects
+    links = []
+    if project_uuids:
+        # Get all similarity relationships where both projects are in our filtered set
+        similarity_placeholders = ','.join(['%s'] * len(project_uuids))
+        cur.execute(
+            f"""
+            SELECT uuid_1, uuid_2, similarity_score
+            FROM similarity
+            WHERE uuid_1 IN ({similarity_placeholders})
+            AND uuid_2 IN ({similarity_placeholders})
+            """, project_uuids + project_uuids)
+        
+        for row in cur.fetchall():
+            uuid_1, uuid_2, similarity_score = row
+            # Only add link if both nodes are in our graph
+            if uuid_1 in nodes_map and uuid_2 in nodes_map:
+                links.append({
+                    "source": uuid_1,  # force-graph expects source/target to be node ids
+                    "target": uuid_2,
+                    "similarity_score": similarity_score
+                })
+
+    cur.close()
+
+    return {
+        "nodes": nodes,
+        "links": links
+    }
+
 @router.get("/similar")
 def similar(uuid: str,
             db: psycopg2.extensions.connection = Depends(get_db)):
