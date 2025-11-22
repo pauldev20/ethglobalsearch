@@ -1,0 +1,21 @@
+query GetPaginatedSubmittedProjects(
+  $filters: ProjectFilters!
+  $pagination: Pagination!
+) {
+  getPaginatedSubmittedProjects(filters: $filters, pagination: $pagination) {
+    skip
+    items {
+      uuid
+      logo {
+        file {
+          fullUrl
+        }
+      }
+      banner {
+        file {
+          fullUrl
+        }
+      }
+    }
+  }
+}

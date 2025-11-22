@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 import psycopg2
 import elasticsearch
+import asyncio
+
+from services.scheduler import update_projects
 
 router = APIRouter(prefix="")
 
@@ -35,8 +38,7 @@ def search(q: SearchQuery, es: elasticsearch.Elasticsearch = Depends(get_es)):
                 "how_its_made": {}
             }
         },
-        size=10
-    )
+        size=10)
     response = []
     for hit in res["hits"]["hits"]:
         response.append({

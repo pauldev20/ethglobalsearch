@@ -1,0 +1,5 @@
+query getPublishedHackathons {
+  getPublishedHackathons {
+    slug
+  }
+}

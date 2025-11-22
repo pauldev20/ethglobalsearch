@@ -41,6 +41,5 @@ def fill_search(db_connection: psycopg2.extensions.connection, es: elasticsearch
         
 
     cur.close()
-    db_connection.close()
 
     return len(projects)
