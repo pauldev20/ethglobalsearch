@@ -36,12 +36,14 @@ MAPPING = {
 }
 
 
-async def generate_embedding(openai_client: AsyncOpenAI, text: str) -> list[float]:
+async def generate_embedding(openai_client: AsyncOpenAI,
+                             text: str) -> list[float]:
     """Generate an embedding for the given text."""
+    # limit to 8000 tokens
+    if len(text) > 8000 * 3:
+        text = text[:8000 * 3]
     response = await openai_client.embeddings.create(
-        model="text-embedding-3-small",
-        input=text
-    )
+        model="text-embedding-3-small", input=text)
     return response.data[0].embedding
 
 
