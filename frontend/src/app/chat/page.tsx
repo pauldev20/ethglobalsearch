@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { sendChatMessage } from "./actions";
 import { Project } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { RenderedText } from "@/components/RenderedText";
 
 type Message = {
   role: "user" | "assistant";
@@ -95,7 +96,7 @@ export default function Chat() {
                           : "bg-muted",
                       )}
                     >
-                      {message.content}
+						<RenderedText text={message.content} />
                       {!!message.projects.length && (
                         <div className="mt-4 -mx-4 -mb-3">
                           <div className="flex gap-3 overflow-x-auto pb-3 px-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">

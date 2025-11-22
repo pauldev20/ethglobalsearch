@@ -34,6 +34,7 @@ export interface Project {
 	primary_repository_url: string;
 	prizes: Prize[];
 	score: number;
+	highlights: { [key: string]: any };
 }
 
 export interface SimilarProject {

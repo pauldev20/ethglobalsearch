@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getProject, Project } from "@/lib/api";
 import { SimilarProjects } from "./SimilarProjects";
 import { MediaCarousel } from "./MediaCarousel";
+import { RenderedText } from "@/components/RenderedText";
 
 
 export default async function ProjectPage({
@@ -125,9 +126,7 @@ export default async function ProjectPage({
             <h2 className="mb-4 text-xl font-bold text-foreground sm:text-2xl">
               About this project
             </h2>
-            <p className="whitespace-pre-wrap leading-relaxed text-foreground/90">
-              {project.description}
-            </p>
+            <RenderedText text={project.description} />
           </Card>
 
           {project.how_its_made && (
@@ -135,9 +134,7 @@ export default async function ProjectPage({
               <h2 className="mb-4 text-xl font-bold text-foreground sm:text-2xl">
                 How it&apos;s Made
               </h2>
-              <p className="whitespace-pre-wrap leading-relaxed text-foreground/90">
-                {project.how_its_made}
-              </p>
+			  <RenderedText text={project.how_its_made} />
             </Card>
           )}
         </div>

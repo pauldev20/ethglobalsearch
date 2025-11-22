@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 
-export function ProjectCard({ project }: { project?: Project }) {
+export function ProjectCard({ project, highlights }: { project?: Project, highlights?: { [key: string]: any } }) {
 	if (!project) {
 		return (
 			<Card className="overflow-hidden border-2 bg-card h-full animate-pulse pt-0">
@@ -62,14 +62,28 @@ export function ProjectCard({ project }: { project?: Project }) {
 				{/* Project Info */}
 				<div className="p-5 space-y-3">
 					<div className="flex items-start justify-between gap-2">
-						<h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-							{project.name}
-						</h3>
+						{highlights?.name?.[0] ? (
+							<h3
+								className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 [&_em]:font-semibold [&_em]:text-primary [&_em]:underline"
+								dangerouslySetInnerHTML={{ __html: highlights.name[0] }}
+							/>
+						) : (
+							<h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+								{project.name}
+							</h3>
+						)}
 					</div>
 					
-					<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-						{project.tagline}
-					</p>
+					{highlights?.tagline?.[0] ? (
+						<p
+							className="text-sm text-muted-foreground line-clamp-2 leading-relaxed [&_em]:font-semibold [&_em]:text-foreground [&_em]:underline"
+							dangerouslySetInnerHTML={{ __html: highlights.tagline[0] }}
+						/>
+					) : (
+						<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+							{project.tagline}
+						</p>
+					)}
 					
 					<div className="flex items-center justify-between pt-2">
 						<Badge variant="secondary" className="text-xs">

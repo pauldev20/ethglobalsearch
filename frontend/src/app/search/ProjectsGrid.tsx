@@ -10,11 +10,13 @@ export async function ProjectsGrid({ query, page, events, types, organizations }
 		const jsonData: SearchResponse | [] = await searchProjects(query, page, 30, events, types, organizations);
 		data = jsonData.results;
 		pagination = jsonData.pagination;
+		console.log(data?.[0].highlights);
 	}
 
 	const startIndex = pagination ? (pagination.page - 1) * pagination.page_size : 0;
 	const endIndex = pagination ? Math.min(startIndex + (data?.length || 0), pagination.total) : 0;
 	const total = pagination?.total || 0;
+
 
 	return (
 		<>
@@ -29,7 +31,7 @@ export async function ProjectsGrid({ query, page, events, types, organizations }
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 				{data && data.map((project: Project) => (
-					<ProjectCard key={project.uuid} project={project} />
+					<ProjectCard key={project.uuid} project={project} highlights={project.highlights} />
 				))}
 				{data === null && (
 					Array.from({ length: 6 }).map((_, index) => (
