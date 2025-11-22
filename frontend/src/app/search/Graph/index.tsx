@@ -7,10 +7,12 @@ import { X } from "lucide-react";
 
 export default async function GraphModal({ query, events, types, organizations, className }: { query: string, events: string, types: string, organizations: string, className: string }) {
 	return (
-		<Dialog.Root>
-			<Dialog.Trigger asChild>
-				<Button className={cn("cursor-pointer", className)}>Open Graph</Button>
-			</Dialog.Trigger>
+		<div className={cn("flex flex-col gap-1", className)}>
+			<div className="text-sm font-medium invisible">Label</div>
+			<Dialog.Root>
+				<Dialog.Trigger asChild>
+					<Button size="lg" className="cursor-pointer">Open Graph</Button>
+				</Dialog.Trigger>
 
 			<Dialog.Portal>
 				<Dialog.Overlay className="fixed inset-0 z-40 bg-black/60" />
@@ -33,5 +35,6 @@ export default async function GraphModal({ query, events, types, organizations, 
 				</Dialog.Content>
 			</Dialog.Portal>
 		</Dialog.Root>
+		</div>
 	);
 }

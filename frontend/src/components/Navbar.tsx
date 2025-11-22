@@ -62,7 +62,7 @@ export function Navbar() {
 								href="/chat"
 								onClick={() => setMobileMenuOpen(false)}
 							>
-								<span>Chat</span>
+								<span>Ask Talwar</span>
 							</a>
 						</li>
 					</div>
@@ -82,7 +82,7 @@ export function Navbar() {
 					</li>
 					<li className="font-medium transition-opacity hover:opacity-60 lg:text-[1.1rem]">
 						<a href="/chat">
-							<span>Chat</span>
+							<span>Ask Talwar</span>
 						</a>
 					</li>
 				</ul>

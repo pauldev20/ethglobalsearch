@@ -24,11 +24,11 @@ export function SearchHeader({ typesData, query, events, types, organizations }:
 			{/* Filter Bar */}
 			<div className="sticky z-40 w-full">
 				<div className="max-w-7xl mx-auto px-4">
-					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-						<div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full">
-							<SelectFilter data={typesData.event_names} placeholder="Select events" queryParam="events" />
-							<SelectFilter data={typesData.types} placeholder="Select categories" queryParam="types" />
-							<SelectFilter data={typesData.sponsor_organizations} placeholder="Select organizations" queryParam="organizations" />
+					<div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
+						<div className="flex flex-wrap items-end gap-2 sm:gap-3 w-full">
+							<SelectFilter label="Events" data={typesData.event_names} placeholder="Select events" queryParam="events" />
+							<SelectFilter label="Categories" data={typesData.types} placeholder="Select categories" queryParam="types" />
+							<SelectFilter label="Organizations" data={typesData.sponsor_organizations} placeholder="Select organizations" queryParam="organizations" />
 							<ClearFilters />
 							<Graph query={query} events={events} types={types} organizations={organizations} className="ml-auto" />
 						</div>

@@ -57,11 +57,24 @@ export interface TypesResponse {
 	sponsor_organizations: string[];
 }
 
+export interface GraphData {
+	nodes: {
+		id: string;
+		name: string;
+		event_name: string;
+	}[];
+	links: {
+		source: string;
+		target: string;
+		similarity_score: number;
+	}[];
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                 Endpoints                                 */
 /* -------------------------------------------------------------------------- */
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = process.env.API_URL;
 
 export const getSimilarProjects = async (uuid: string) => {
 	const response = await fetch(`${API_URL}/similar?uuid=${uuid}`, {
@@ -102,5 +115,24 @@ export const getTypes = async () => {
 		next: { revalidate: 300 },
 	});
 	const data: TypesResponse = await response.json();
+	return data;
+};
+
+export const getGraph = async (query: string, events: string, types: string, organizations: string, threshold: number) => {
+	const response = await fetch(`${API_URL}/graph?threshold=${threshold}`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			query,
+			events,
+			types,
+			organizations,
+			...(organizations ? { sponsor_organization: organizations.split(',') } : {}),
+			...(types ? { prize_type: types.split(',') } : {}),
+			...(events ? { event_name: events.split(',') } : {})
+		}),
+		next: { revalidate: 300 },
+	});
+	const data: GraphData = await response.json();
 	return data;
 };
