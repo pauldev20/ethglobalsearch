@@ -52,7 +52,7 @@ def search(q: SearchQuery,
            db: psycopg2.extensions.connection = Depends(get_db),
            es: elasticsearch.Elasticsearch = Depends(get_es)):
     INDEX = "documents"
-    
+
     # Pagination parameters
     page = max(1, q.page or 1)
     page_size = max(1, min(100, q.page_size or 12))  # Limit max page_size to 100
@@ -162,7 +162,7 @@ def search(q: SearchQuery,
             FROM prize
             WHERE project_uuid IN ({prize_placeholders})
         """, project_uuids)
-        
+
         prize_columns = [desc[0] for desc in cur.description]
         for row in cur.fetchall():
             project_uuid = row[0]
@@ -220,7 +220,7 @@ def graph(q: SearchQuery,
           db: psycopg2.extensions.connection = Depends(get_db),
           es: elasticsearch.Elasticsearch = Depends(get_es)):
     INDEX = "documents"
-    
+
     # Build Elasticsearch bool query with all filters (same as /search)
     must_clauses = []
     filter_clauses = []
@@ -299,18 +299,18 @@ def graph(q: SearchQuery,
     project_uuids = [project[0] for project in projects]  # uuid is first column
     nodes = []
     nodes_map = {}  # uuid -> node index for quick lookup
-    
+
     for idx, project in enumerate(projects):
         project_dict = dict(zip(columns, project))
         uuid = project_dict["uuid"]
-        
+
         # Create node with only id, name, and event_name for force-graph
         node = {
             "id": uuid,
             "name": project_dict.get("name"),
             "event_name": project_dict.get("event_name")
         }
-        
+
         nodes.append(node)
         nodes_map[uuid] = idx
 
@@ -327,7 +327,7 @@ def graph(q: SearchQuery,
             AND uuid_2 IN ({similarity_placeholders})
             AND similarity_score > %s
             """, project_uuids + project_uuids + [threshold])
-        
+
         for row in cur.fetchall():
             uuid_1, uuid_2, similarity_score = row
             # Only add link if both nodes are in our graph
@@ -389,7 +389,7 @@ def similar(uuid: str,
             FROM prize
             WHERE project_uuid IN ({prize_placeholders})
         """, project_uuids)
-        
+
         prize_columns = [desc[0] for desc in cur.description]
         for row in cur.fetchall():
             project_uuid = row[0]
@@ -433,7 +433,7 @@ def similar(uuid: str,
 def get_project(uuid: str,
                 db: psycopg2.extensions.connection = Depends(get_db)):
     cur = db.cursor()
-    
+
     # Fetch the project by UUID
     cur.execute(
         """
@@ -444,17 +444,17 @@ def get_project(uuid: str,
     )
     columns = [desc[0] for desc in cur.description]
     project = cur.fetchone()
-    
+
     # If project not found, return 404
     if not project:
         cur.close()
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     # Convert to dictionary
     project_dict = dict(zip(columns, project))
     project_uuid = project_dict["uuid"]
-    
+
     # Fetch prizes for the project
     cur.execute(
         """
@@ -463,7 +463,7 @@ def get_project(uuid: str,
         WHERE project_uuid = %s
         """, (project_uuid,)
     )
-    
+
     prize_columns = [desc[0] for desc in cur.description]
     prizes = []
     for row in cur.fetchall():
@@ -479,12 +479,12 @@ def get_project(uuid: str,
             "sponsor_organization_name": prize_dict["sponsor_organization_name"],
             "sponsor_organization_square_logo_url": prize_dict["sponsor_organization_square_logo_url"]
         })
-    
+
     cur.close()
-    
+
     # Build response with project and prizes
     result = {**project_dict, "prizes": prizes}
-    
+
     return result
 
 class ChatQuery(BaseModel):
@@ -538,10 +538,10 @@ social media, messaging, social network, chat app, community platform, user prof
         knn={
             "field": "embedding",
             "query_vector": embedding,
-            "k": 100,
-            "num_candidates": 500,
+            "k": 10,
+            "num_candidates": 50,
         },
-        size=100,
+        size=10,
     )
 
     # Extract results
@@ -553,7 +553,11 @@ social media, messaging, social network, chat app, community platform, user prof
 
     # If no results, return empty
     if not es_result_ids:
-        return []
+        return {
+            "message":
+            "I couldn't find any projects matching your query. Try rephrasing your request or using different keywords.",
+            "projects": []
+        }
 
     # Fetch full project data from database
     placeholders = ','.join(['%s'] * len(es_result_ids))
@@ -580,7 +584,7 @@ social media, messaging, social network, chat app, community platform, user prof
             FROM prize
             WHERE project_uuid IN ({prize_placeholders})
         """, project_uuids)
-        
+
         prize_columns = [desc[0] for desc in cur.description]
         for row in cur.fetchall():
             project_uuid = row[0]
@@ -588,15 +592,24 @@ social media, messaging, social network, chat app, community platform, user prof
                 prizes_map[project_uuid] = []
             prize_dict = dict(zip(prize_columns, row))
             prizes_map[project_uuid].append({
-                "project_uuid": prize_dict["project_uuid"],
-                "name": prize_dict["name"],
-                "pool_prize": prize_dict["pool_prize"],
-                "prize_name": prize_dict["prize_name"],
-                "prize_emoji": prize_dict["prize_emoji"],
-                "prize_type": prize_dict["prize_type"],
-                "sponsor_name": prize_dict["sponsor_name"],
-                "sponsor_organization_name": prize_dict["sponsor_organization_name"],
-                "sponsor_organization_square_logo_url": prize_dict["sponsor_organization_square_logo_url"]
+                "project_uuid":
+                prize_dict["project_uuid"],
+                "name":
+                prize_dict["name"],
+                "pool_prize":
+                prize_dict["pool_prize"],
+                "prize_name":
+                prize_dict["prize_name"],
+                "prize_emoji":
+                prize_dict["prize_emoji"],
+                "prize_type":
+                prize_dict["prize_type"],
+                "sponsor_name":
+                prize_dict["sponsor_name"],
+                "sponsor_organization_name":
+                prize_dict["sponsor_organization_name"],
+                "sponsor_organization_square_logo_url":
+                prize_dict["sponsor_organization_square_logo_url"]
             })
 
     cur.close()
@@ -618,7 +631,52 @@ social media, messaging, social network, chat app, community platform, user prof
     # Sort by similarity score (descending) to maintain order
     response.sort(key=lambda x: x.get("similarity_score", 0), reverse=True)
 
-    return response
+    # Step 4: Generate a nice message for the user using the original query and search results
+    # Prepare project summaries for context
+    project_summaries = []
+    for project in response[:
+                            5]:  # Limit to top 5 for context to avoid token limits
+        summary = f"- {project.get('name', 'Unknown')}: {project.get('tagline', '')}"
+        if project.get('description'):
+            # Truncate description if too long
+            desc = project.get('description', '')[:200]
+            summary += f" - {desc}..."
+        project_summaries.append(summary)
+
+    projects_context = "\n".join(project_summaries)
+    total_found = len(response)
+
+    # Generate user-friendly message
+    message_response = await openai_client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{
+            "role":
+            "system",
+            "content":
+            """You are a helpful assistant named kartik the CEO of EthGlobal that explains search results to users in a friendly, conversational way.
+            - Be concise but informative
+            - Highlight what makes the results relevant to the user's query
+            - Mention the number of projects found
+            - Keep it to a few paragraphs maximum
+            - Be enthusiastic but professional"""
+        }, {
+            "role":
+            "user",
+            "content":
+            f"""User's original query: "{q.query}"
+
+I found {total_found} project(s) matching their request. Here are the top results:
+
+{projects_context}
+
+Generate a friendly message explaining these results to the user."""
+        }],
+        temperature=0.7,
+        max_tokens=5000)
+
+    message = message_response.choices[0].message.content.strip()
+
+    return {"message": message, "projects": response}
 
 class EmbeddingsQuery(BaseModel):
     keywords: str
@@ -682,7 +740,7 @@ async def embeddings(q: EmbeddingsQuery,
             FROM prize
             WHERE project_uuid IN ({prize_placeholders})
         """, project_uuids)
-        
+
         prize_columns = [desc[0] for desc in cur.description]
         for row in cur.fetchall():
             project_uuid = row[0]
