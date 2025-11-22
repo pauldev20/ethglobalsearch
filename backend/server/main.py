@@ -10,17 +10,13 @@ from services.scheduler import start_scheduler
 
 
 DB_URL = os.getenv("DB_URL", "postgresql://postgres:password@localhost:5432/search")
-ES_URL = os.getenv("ES_URL", "https://localhost:9200")
-ES_USERNAME = os.getenv("ES_USERNAME", "elastic")
-ES_PASSWORD = os.getenv("ES_PASSWORD", "changeme")
-
+ES_URL = os.getenv("ES_URL", "https://elastic:changeme@localhost:9200")
 
 @contextlib.asynccontextmanager
 async def lifespan(app: fastapi.FastAPI):
     db = psycopg2.connect(DB_URL)
     es = elasticsearch.Elasticsearch(
         ES_URL,
-        basic_auth=(ES_USERNAME, ES_PASSWORD),
         verify_certs=False,
         ssl_show_warn=False,
     )
