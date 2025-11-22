@@ -80,10 +80,10 @@ export default function Search() {
 						
 						<div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
 							<Select>
-								<SelectTrigger className="w-full sm:w-[180px] h-10 text-sm">
+								<SelectTrigger className="w-full sm:w-[180px] h-10 text-sm bg-card border-border">
 									<SelectValue placeholder="Select events" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="bg-card">
 									<SelectItem value="all">All Events</SelectItem>
 									<SelectItem value="bangkok">ETHGlobal Bangkok</SelectItem>
 									<SelectItem value="san-francisco">ETHGlobal San Francisco</SelectItem>
@@ -95,10 +95,10 @@ export default function Search() {
 							</Select>
 
 							<Select>
-								<SelectTrigger className="w-full sm:w-[180px] h-10 text-sm">
+								<SelectTrigger className="w-full sm:w-[180px] h-10 text-sm bg-card border-border">
 									<SelectValue placeholder="All Categories" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="bg-card">
 									<SelectItem value="all">All Categories</SelectItem>
 									<SelectItem value="defi">DeFi</SelectItem>
 									<SelectItem value="nft">NFTs</SelectItem>
@@ -113,6 +113,8 @@ export default function Search() {
 				</div>
 			</div>
 
+			<hr className="my-4 border-t border-border" />
+
 			{/* Projects Grid */}
 			<div className="max-w-7xl mx-auto px-4 py-8">
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -122,7 +124,7 @@ export default function Search() {
 							href={`/project/${project.id}`}
 							className="group block"
 						>
-							<Card className="overflow-hidden border-2 transition-all hover:shadow-xl hover:border-foreground/20 h-full">
+							<Card className="overflow-hidden border-2 bg-card transition-all hover:shadow-xl hover:border-foreground/20 h-full">
 								{/* Project Image */}
 								<div className="aspect-video w-full bg-linear-to-br from-purple-100 via-blue-100 to-pink-100 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-pink-900/20 relative overflow-hidden">
 									<div className="absolute inset-0 flex items-center justify-center">
