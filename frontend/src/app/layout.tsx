@@ -33,11 +33,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${fontSans.variable} h-screen bg-background font-sans antialiased flex flex-col overflow-hidden`}>
-                <div className="flex-1 overflow-y-auto">
-                	<Navbar />
-                    {children}
-                </div>
+            <body className={`${fontSans.variable} min-h-screen bg-background font-sans antialiased flex flex-col`}>
+				<Navbar />
+				{children}
             </body>
         </html>
     );

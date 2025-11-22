@@ -1,165 +1,183 @@
 import { SearchBar } from "@/components/SearchBar";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
 
+const PROJECTS = [
+  {
+    name: "DeFi Protocol",
+    category: "DeFi",
+    prize: "1st Place",
+    description:
+      "Next-generation decentralized exchange with automated market making",
+    hackathon: "ETHGlobal Bangkok",
+  },
+  {
+    name: "ZK Rollup Chain",
+    category: "Infrastructure",
+    prize: "2nd Place",
+    description:
+      "Scalable Layer 2 solution using zero-knowledge proofs",
+    hackathon: "ETHGlobal San Francisco",
+  },
+  {
+    name: "NFT Marketplace",
+    category: "NFTs",
+    prize: "3rd Place",
+    description:
+      "Cross-chain NFT marketplace with instant settlements",
+    hackathon: "ETHGlobal Taipei",
+  },
+  {
+    name: "DAO Governance Tool",
+    category: "DAOs",
+    prize: "Finalist",
+    description:
+      "Decentralized governance platform with quadratic voting",
+    hackathon: "ETHGlobal Denver",
+  },
+  {
+    name: "Privacy Protocol",
+    category: "ZK",
+    prize: "Finalist",
+    description:
+      "Privacy-preserving smart contracts using zero-knowledge proofs",
+    hackathon: "ETHGlobal Paris",
+  },
+  {
+    name: "Social DApp",
+    category: "Social",
+    prize: "Finalist",
+    description:
+      "Decentralized social media platform on Ethereum",
+    hackathon: "ETHGlobal Istanbul",
+  },
+  {
+    name: "Lending Platform",
+    category: "DeFi",
+    prize: "Finalist",
+    description:
+      "Peer-to-peer lending with dynamic interest rates",
+    hackathon: "ETHGlobal Waterloo",
+  },
+  {
+    name: "Identity Solution",
+    category: "Identity",
+    prize: "Finalist",
+    description:
+      "Self-sovereign identity management system",
+    hackathon: "ETHGlobal New York",
+  },
+  {
+    name: "Gaming Platform",
+    category: "Gaming",
+    prize: "Finalist",
+    description:
+      "On-chain gaming with NFT rewards and achievements",
+    hackathon: "ETHGlobal Tokyo",
+  },
+  {
+    name: "Supply Chain Tracker",
+    category: "Enterprise",
+    prize: "Finalist",
+    description:
+      "Blockchain-based supply chain transparency solution",
+    hackathon: "ETHGlobal London",
+  },
+] as const;
+
+type Project = (typeof PROJECTS)[number];
+
+function ProjectCard({ project }: { project: Project }) {
+  return (
+    <div className="group relative flex h-full flex-col rounded-xl border-2 border-border bg-card p-4 transition-all hover:border-foreground hover:shadow-lg sm:rounded-2xl sm:p-6">
+      <div className="mb-3 inline-flex flex-wrap items-center gap-2 sm:mb-4">
+        <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground sm:px-3">
+          {project.prize}
+        </span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground sm:px-3">
+          {project.category}
+        </span>
+      </div>
+
+      <div className="grow space-y-2 sm:space-y-3">
+        <h3 className="text-lg font-bold text-foreground group-hover:underline sm:text-xl">
+          {project.name}
+        </h3>
+        <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+          {project.description}
+        </p>
+        <p className="text-xs text-muted-foreground/70">
+          {project.hackathon}
+        </p>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground opacity-0 transition-opacity group-hover:opacity-100 sm:mt-4">
+        <span>View project</span>
+        <span className="transition-transform group-hover:translate-x-1">→</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
-    return (
-		<>
-			<DotPattern
-				className={cn(
-					"mask-[radial-gradient(500px_circle_at_center,white,transparent)] sm:mask-[radial-gradient(600px_circle_at_center,white,transparent)] -z-10",
-				)}
-			/>
-			<main className="relative flex min-h-full w-full flex-col items-center justify-center py-8 sm:py-16">
-				{/* Content Container */}
-				<div className="relative z-10 w-full max-w-7xl space-y-12 sm:space-y-16 px-4 sm:px-6 lg:px-8">
+  return (
+    <>
+      <DotPattern
+        className={cn(
+          "mask-[radial-gradient(500px_circle_at_center,white,transparent)]",
+          "sm:mask-[radial-gradient(600px_circle_at_center,white,transparent)]",
+          "-z-10",
+        )}
+      />
 
-					{/* Search Section */}
-					<div className="max-w-4xl mx-auto">
-						<div className="relative group">
-							{/* Glowing Effect */}
-							<div className="absolute -inset-0.5 bg-linear-to-r from-purple-600 via-blue-600 to-pink-600 rounded-xl sm:rounded-2xl blur opacity-0 group-hover:opacity-30 group-focus-within:opacity-40 transition-opacity duration-500" />
-							
-							{/* Search Input Container */}
-							<SearchBar />
-						</div>
-					</div>
+      <main className="relative flex-1 flex w-full flex-col items-center justify-center py-8 sm:py-16">
+        <div className="relative z-10 w-full max-w-7xl space-y-12 px-4 sm:space-y-16 sm:px-6 lg:px-8">
+          {/* Search */}
+          <div className="mx-auto max-w-4xl">
+            <div className="group relative">
+              <div className="absolute -inset-0.5 rounded-xl bg-linear-to-r from-purple-600 via-blue-600 to-pink-600 blur opacity-0 transition-opacity duration-500 group-hover:opacity-30 group-focus-within:opacity-40 sm:rounded-2xl" />
+              <SearchBar />
+            </div>
+          </div>
 
-					{/* Latest Finalists Section */}
-					<div className="space-y-6 sm:space-y-8">
-						{/* Section Header with Filters */}
-						<div className="space-y-4">
-							{/* Title */}
-							<div className="relative flex items-center w-full px-2">
-								<div className="grow border-t border-border" />
-								<h2 className="shrink-0 px-4 sm:px-6 text-lg sm:text-1xl md:text-2xl font-bold text-foreground whitespace-nowrap">
-									Latest Finalists
-								</h2>
-								<div className="grow border-t border-border" />
-							</div>
-						</div>
-						
-						<Carousel
-							opts={{
-								align: "start",
-								loop: true,
-							}}
-							className="w-full px-1"
-						>
-							<CarouselContent className="-ml-2 sm:-ml-4">
-								{[
-									{ 
-										name: 'DeFi Protocol', 
-										category: 'DeFi', 
-										prize: '1st Place',
-										description: 'Next-generation decentralized exchange with automated market making',
-										hackathon: 'ETHGlobal Bangkok'
-									},
-									{ 
-										name: 'ZK Rollup Chain', 
-										category: 'Infrastructure', 
-										prize: '2nd Place',
-										description: 'Scalable Layer 2 solution using zero-knowledge proofs',
-										hackathon: 'ETHGlobal San Francisco'
-									},
-									{ 
-										name: 'NFT Marketplace', 
-										category: 'NFTs', 
-										prize: '3rd Place',
-										description: 'Cross-chain NFT marketplace with instant settlements',
-										hackathon: 'ETHGlobal Taipei'
-									},
-									{ 
-										name: 'DAO Governance Tool', 
-										category: 'DAOs', 
-										prize: 'Finalist',
-										description: 'Decentralized governance platform with quadratic voting',
-										hackathon: 'ETHGlobal Denver'
-									},
-									{ 
-										name: 'Privacy Protocol', 
-										category: 'ZK', 
-										prize: 'Finalist',
-										description: 'Privacy-preserving smart contracts using zero-knowledge proofs',
-										hackathon: 'ETHGlobal Paris'
-									},
-									{ 
-										name: 'Social DApp', 
-										category: 'Social', 
-										prize: 'Finalist',
-										description: 'Decentralized social media platform on Ethereum',
-										hackathon: 'ETHGlobal Istanbul'
-									},
-									{ 
-										name: 'Lending Platform', 
-										category: 'DeFi', 
-										prize: 'Finalist',
-										description: 'Peer-to-peer lending with dynamic interest rates',
-										hackathon: 'ETHGlobal Waterloo'
-									},
-									{ 
-										name: 'Identity Solution', 
-										category: 'Identity', 
-										prize: 'Finalist',
-										description: 'Self-sovereign identity management system',
-										hackathon: 'ETHGlobal New York'
-									},
-									{ 
-										name: 'Gaming Platform', 
-										category: 'Gaming', 
-										prize: 'Finalist',
-										description: 'On-chain gaming with NFT rewards and achievements',
-										hackathon: 'ETHGlobal Tokyo'
-									},
-									{ 
-										name: 'Supply Chain Tracker', 
-										category: 'Enterprise', 
-										prize: 'Finalist',
-										description: 'Blockchain-based supply chain transparency solution',
-										hackathon: 'ETHGlobal London'
-									},
-								].map((project, idx) => (
-									<CarouselItem key={idx} className="pl-2 sm:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-										<div className="group relative rounded-xl sm:rounded-2xl border-2 border-border bg-card p-4 sm:p-6 transition-all hover:border-foreground hover:shadow-lg h-full flex flex-col">
-											{/* Prize Badge */}
-											<div className="inline-flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
-												<span className="px-2.5 sm:px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-													{project.prize}
-												</span>
-												<span className="px-2.5 sm:px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
-													{project.category}
-												</span>
-											</div>
-											
-											{/* Project Info */}
-											<div className="space-y-2 sm:space-y-3 grow">
-												<h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:underline">
-													{project.name}
-												</h3>
-												<p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-													{project.description}
-												</p>
-												<p className="text-xs text-muted-foreground/70">
-													{project.hackathon}
-												</p>
-											</div>
+          {/* Latest Finalists */}
+          <div className="space-y-6 sm:space-y-8">
+            <div className="relative flex w-full items-center px-2 space-y-0">
+              <div className="grow border-t border-foreground/20" />
+              <h2 className="shrink-0 whitespace-nowrap px-4 text-lg font-bold text-foreground sm:px-6 sm:text-1xl md:text-2xl">
+                Latest Finalists
+              </h2>
+              <div className="grow border-t border-foreground/20" />
+            </div>
 
-											{/* View Arrow */}
-											<div className="mt-3 sm:mt-4 flex items-center gap-2 text-sm font-medium text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-												<span>View project</span>
-												<span className="group-hover:translate-x-1 transition-transform">→</span>
-											</div>
-										</div>
-									</CarouselItem>
-								))}
-							</CarouselContent>
-							<CarouselPrevious className="-left-8 lg:-left-12 hidden lg:flex" />
-							<CarouselNext className="-right-8 lg:-right-12 hidden lg:flex" />
-						</Carousel>
-					</div>
-				</div>
-			</main>
-		</>
-    );
+            <Carousel
+              opts={{ align: "start", loop: true }}
+              className="w-full px-1"
+            >
+              <CarouselContent className="-ml-2 sm:-ml-4">
+                {PROJECTS.map((project, idx) => (
+                  <CarouselItem
+                    key={idx}
+                    className="basis-full pl-2 sm:basis-1/2 sm:pl-4 lg:basis-1/3 xl:basis-1/4"
+                  >
+                    <ProjectCard project={project} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              <CarouselPrevious className="-left-8 hidden lg:-left-12 lg:flex" />
+              <CarouselNext className="-right-8 hidden lg:-right-12 lg:flex" />
+            </Carousel>
+          </div>
+        </div>
+      </main>
+    </>
+  );
 }
