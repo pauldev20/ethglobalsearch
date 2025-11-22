@@ -55,7 +55,8 @@ def search(q: SearchQuery,
         must_clauses.append({
             "multi_match": {
                 "query": q.query,
-                "fields": ["name^5", "tagline^2", "description", "how_its_made"],
+                "fields":
+                ["name^5", "tagline^2", "description", "how_its_made"],
                 "type": "best_fields",
                 "operator": "or",
                 "fuzziness": "AUTO",
@@ -65,27 +66,18 @@ def search(q: SearchQuery,
 
     # Filter by event_name
     if q.event_name:
-        filter_clauses.append({
-            "terms": {
-                "event_name": q.event_name
-            }
-        })
+        filter_clauses.append({"terms": {"event_name": q.event_name}})
 
     # Filter by prize type
     if q.prize_type:
-        filter_clauses.append({
-            "terms": {
-                "type": q.prize_type
-            }
-        })
+        filter_clauses.append({"terms": {"type": q.prize_type}})
 
     # Filter by sponsor_organization
     if q.sponsor_organization:
-        filter_clauses.append({
-            "terms": {
+        filter_clauses.append(
+            {"terms": {
                 "sponsor_organization": q.sponsor_organization
-            }
-        })
+            }})
 
     # Build the query
     es_query = {}
@@ -137,14 +129,13 @@ def search(q: SearchQuery,
         SELECT *
         FROM project
         WHERE uuid IN ({placeholders})
-        """,
-        es_result_ids
-    )
+        """, es_result_ids)
     columns = [desc[0] for desc in cur.description]
     projects = cur.fetchall()
 
     # Fetch prizes for all matching projects
-    project_uuids = [project[0] for project in projects]  # uuid is first column
+    project_uuids = [project[0]
+                     for project in projects]  # uuid is first column
     prizes_map = {}
 
     if project_uuids:
@@ -191,6 +182,85 @@ def search(q: SearchQuery,
 
     # Sort by Elasticsearch score (descending), items without score go last
     response.sort(key=lambda x: x.get("score", 0), reverse=True)
+
+    return response
+
+@router.get("/similar")
+def similar(uuid: str,
+            db: psycopg2.extensions.connection = Depends(get_db)):
+    cur = db.cursor()
+    # Get top 20 most similar projects ordered by similarity score
+    cur.execute(
+        "SELECT uuid_2, similarity_score FROM similarity WHERE uuid_1 = %s ORDER BY similarity_score DESC LIMIT 20",
+        (uuid,)
+    )
+    results = cur.fetchall()
+    cur.close()
+    
+    # If no results, return empty list
+    if not results:
+        return []
+    
+    # Extract UUIDs and similarity scores
+    similar_uuids = [row[0] for row in results]
+    similarity_scores = {row[0]: row[1] for row in results}
+    
+    # Fetch full project data from database
+    placeholders = ','.join(['%s'] * len(similar_uuids))
+    cur = db.cursor()
+    cur.execute(
+        f"""
+        SELECT *
+        FROM project
+        WHERE uuid IN ({placeholders})
+        """, similar_uuids)
+    columns = [desc[0] for desc in cur.description]
+    projects = cur.fetchall()
+
+    # Fetch prizes for all matching projects
+    project_uuids = [project[0] for project in projects]  # uuid is first column
+    prizes_map = {}
+
+    if project_uuids:
+        prize_placeholders = ','.join(['%s'] * len(project_uuids))
+        cur.execute(
+            f"""
+            SELECT project_uuid, name, detail, emoji, type, sponsor, sponsor_organization
+            FROM prize
+            WHERE project_uuid IN ({prize_placeholders})
+        """, project_uuids)
+
+        for row in cur.fetchall():
+            project_uuid = row[0]
+            if project_uuid not in prizes_map:
+                prizes_map[project_uuid] = []
+            prizes_map[project_uuid].append({
+                "name": row[1],
+                "detail": row[2],
+                "emoji": row[3],
+                "type": row[4],
+                "sponsor": row[5],
+                "sponsor_organization": row[6]
+            })
+
+    cur.close()
+
+    # Build response with full entries and similarity scores
+    response = []
+    for project in projects:
+        project_dict = dict(zip(columns, project))
+        project_uuid = project_dict["uuid"]
+
+        result = {**project_dict, "prizes": prizes_map.get(project_uuid, [])}
+        
+        # Add similarity score
+        if project_uuid in similarity_scores:
+            result["similarity_score"] = similarity_scores[project_uuid]
+
+        response.append(result)
+
+    # Sort by similarity score (descending) to maintain order
+    response.sort(key=lambda x: x.get("similarity_score", 0), reverse=True)
 
     return response
 
