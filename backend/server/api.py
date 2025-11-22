@@ -288,6 +288,59 @@ def similar(uuid: str,
 
     return response
 
+@router.get("/project")
+def get_project(uuid: str,
+                db: psycopg2.extensions.connection = Depends(get_db)):
+    cur = db.cursor()
+    
+    # Fetch the project by UUID
+    cur.execute(
+        """
+        SELECT *
+        FROM project
+        WHERE uuid = %s
+        """, (uuid,)
+    )
+    columns = [desc[0] for desc in cur.description]
+    project = cur.fetchone()
+    
+    # If project not found, return 404
+    if not project:
+        cur.close()
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    # Convert to dictionary
+    project_dict = dict(zip(columns, project))
+    project_uuid = project_dict["uuid"]
+    
+    # Fetch prizes for the project
+    cur.execute(
+        """
+        SELECT project_uuid, name, detail, emoji, type, sponsor, sponsor_organization
+        FROM prize
+        WHERE project_uuid = %s
+        """, (project_uuid,)
+    )
+    
+    prizes = []
+    for row in cur.fetchall():
+        prizes.append({
+            "name": row[1],
+            "detail": row[2],
+            "emoji": row[3],
+            "type": row[4],
+            "sponsor": row[5],
+            "sponsor_organization": row[6]
+        })
+    
+    cur.close()
+    
+    # Build response with project and prizes
+    result = {**project_dict, "prizes": prizes}
+    
+    return result
+
 class ChatQuery(BaseModel):
     query: str
 
