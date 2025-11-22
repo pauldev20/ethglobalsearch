@@ -7,29 +7,46 @@ query GetPaginatedSubmittedProjects(
     items {
       uuid
       slug
+      emoji
       name
       tagline
       description
       howItsMade
       sourceCodeUrl
+      url
       event {
-        id
         name
       }
       logo {
         file {
-          path
           fullUrl
         }
       }
       banner {
         file {
-          path
           fullUrl
         }
       }
+      screenshots {
+        rank
+        file {
+          fullUrl
+        }
+      }
+      video {
+        file {
+          fullUrl
+        }
+        muxUrl
+        muxThumbnailUrl
+        youtubeId
+      }
+      primaryRepository {
+        url
+      }
       prizes {
         name
+        poolPrize
         prize {
           name
           emoji
@@ -38,11 +55,13 @@ query GetPaginatedSubmittedProjects(
             name
             organization {
               name
+              squareLogo {
+                fullUrl
+              }
             }
           }
         }
       }
-      meta
     }
   }
 }

@@ -42,9 +42,14 @@ async def generate_embedding(openai_client: AsyncOpenAI,
     # limit to 8000 tokens
     if len(text) > 8000 * 3:
         text = text[:8000 * 3]
-    response = await openai_client.embeddings.create(
-        model="text-embedding-3-small", input=text)
-    return response.data[0].embedding
+    while True:
+        try:
+            response = await openai_client.embeddings.create(
+                model="text-embedding-3-small", input=text)
+            return response.data[0].embedding
+        except:
+            text = text[:len(text)/2]
+
 
 
 async def ensure_index(es: elasticsearch.Elasticsearch):
@@ -79,7 +84,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
 
         # Fetch all prizes grouped by project
         cur.execute("""
-            SELECT project_uuid, type, sponsor_organization
+            SELECT project_uuid, prize_type, sponsor_organization_name
             FROM prize
             ORDER BY project_uuid
         """)

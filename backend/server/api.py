@@ -26,11 +26,11 @@ def get_openai(request: Request) -> AsyncOpenAI:
 @router.get("/types")
 def get_types(db: psycopg2.extensions.connection = Depends(get_db)):
     cur = db.cursor()
-    cur.execute("SELECT DISTINCT type FROM prize")
+    cur.execute("SELECT DISTINCT prize_type FROM prize")
     types = cur.fetchall()
     event_names = cur.execute("SELECT DISTINCT event_name FROM project")
     event_names = cur.fetchall()
-    sponsor_organizations = cur.execute("SELECT DISTINCT sponsor_organization FROM prize")
+    sponsor_organizations = cur.execute("SELECT DISTINCT sponsor_organization_name FROM prize")
     sponsor_organizations = cur.fetchall()
 
     return {
@@ -82,13 +82,13 @@ def search(q: SearchQuery,
 
     # Filter by prize type
     if q.prize_type:
-        filter_clauses.append({"terms": {"type": q.prize_type}})
+        filter_clauses.append({"terms": {"prize_type": q.prize_type}})
 
     # Filter by sponsor_organization
     if q.sponsor_organization:
         filter_clauses.append(
             {"terms": {
-                "sponsor_organization": q.sponsor_organization
+                "sponsor_organization_name": q.sponsor_organization
             }})
 
     # Build the query
@@ -158,22 +158,27 @@ def search(q: SearchQuery,
         prize_placeholders = ','.join(['%s'] * len(project_uuids))
         cur.execute(
             f"""
-            SELECT project_uuid, name, detail, emoji, type, sponsor, sponsor_organization
+            SELECT *
             FROM prize
             WHERE project_uuid IN ({prize_placeholders})
         """, project_uuids)
-
+        
+        prize_columns = [desc[0] for desc in cur.description]
         for row in cur.fetchall():
             project_uuid = row[0]
             if project_uuid not in prizes_map:
                 prizes_map[project_uuid] = []
+            prize_dict = dict(zip(prize_columns, row))
             prizes_map[project_uuid].append({
-                "name": row[1],
-                "detail": row[2],
-                "emoji": row[3],
-                "type": row[4],
-                "sponsor": row[5],
-                "sponsor_organization": row[6]
+                "project_uuid": prize_dict["project_uuid"],
+                "name": prize_dict["name"],
+                "pool_prize": prize_dict["pool_prize"],
+                "prize_name": prize_dict["prize_name"],
+                "prize_emoji": prize_dict["prize_emoji"],
+                "prize_type": prize_dict["prize_type"],
+                "sponsor_name": prize_dict["sponsor_name"],
+                "sponsor_organization_name": prize_dict["sponsor_organization_name"],
+                "sponsor_organization_square_logo_url": prize_dict["sponsor_organization_square_logo_url"]
             })
 
     cur.close()
@@ -239,13 +244,13 @@ def graph(q: SearchQuery,
 
     # Filter by prize type
     if q.prize_type:
-        filter_clauses.append({"terms": {"type": q.prize_type}})
+        filter_clauses.append({"terms": {"prize_type": q.prize_type}})
 
     # Filter by sponsor_organization
     if q.sponsor_organization:
         filter_clauses.append(
             {"terms": {
-                "sponsor_organization": q.sponsor_organization
+                "sponsor_organization_name": q.sponsor_organization
             }})
 
     # Build the query
@@ -294,18 +299,16 @@ def graph(q: SearchQuery,
     nodes = []
     nodes_map = {}  # uuid -> node index for quick lookup
     
-    # Fields to exclude
-    exclude_fields = {"slug", "tagline", "description", "how_its_made", "source_code_url", "logo_url", "banner_url"}
-    
     for idx, project in enumerate(projects):
         project_dict = dict(zip(columns, project))
         uuid = project_dict["uuid"]
         
-        # Create node with id field for force-graph, excluding specified fields
-        node = {"id": uuid}
-        for key, value in project_dict.items():
-            if key not in exclude_fields and key != "uuid":  # uuid is already added as "id"
-                node[key] = value
+        # Create node with only id, name, and event_name for force-graph
+        node = {
+            "id": uuid,
+            "name": project_dict.get("name"),
+            "event_name": project_dict.get("event_name")
+        }
         
         nodes.append(node)
         nodes_map[uuid] = idx
@@ -380,22 +383,27 @@ def similar(uuid: str,
         prize_placeholders = ','.join(['%s'] * len(project_uuids))
         cur.execute(
             f"""
-            SELECT project_uuid, name, detail, emoji, type, sponsor, sponsor_organization
+            SELECT *
             FROM prize
             WHERE project_uuid IN ({prize_placeholders})
         """, project_uuids)
-
+        
+        prize_columns = [desc[0] for desc in cur.description]
         for row in cur.fetchall():
             project_uuid = row[0]
             if project_uuid not in prizes_map:
                 prizes_map[project_uuid] = []
+            prize_dict = dict(zip(prize_columns, row))
             prizes_map[project_uuid].append({
-                "name": row[1],
-                "detail": row[2],
-                "emoji": row[3],
-                "type": row[4],
-                "sponsor": row[5],
-                "sponsor_organization": row[6]
+                "project_uuid": prize_dict["project_uuid"],
+                "name": prize_dict["name"],
+                "pool_prize": prize_dict["pool_prize"],
+                "prize_name": prize_dict["prize_name"],
+                "prize_emoji": prize_dict["prize_emoji"],
+                "prize_type": prize_dict["prize_type"],
+                "sponsor_name": prize_dict["sponsor_name"],
+                "sponsor_organization_name": prize_dict["sponsor_organization_name"],
+                "sponsor_organization_square_logo_url": prize_dict["sponsor_organization_square_logo_url"]
             })
 
     cur.close()
@@ -448,21 +456,26 @@ def get_project(uuid: str,
     # Fetch prizes for the project
     cur.execute(
         """
-        SELECT project_uuid, name, detail, emoji, type, sponsor, sponsor_organization
+        SELECT *
         FROM prize
         WHERE project_uuid = %s
         """, (project_uuid,)
     )
     
+    prize_columns = [desc[0] for desc in cur.description]
     prizes = []
     for row in cur.fetchall():
+        prize_dict = dict(zip(prize_columns, row))
         prizes.append({
-            "name": row[1],
-            "detail": row[2],
-            "emoji": row[3],
-            "type": row[4],
-            "sponsor": row[5],
-            "sponsor_organization": row[6]
+            "project_uuid": prize_dict["project_uuid"],
+            "name": prize_dict["name"],
+            "pool_prize": prize_dict["pool_prize"],
+            "prize_name": prize_dict["prize_name"],
+            "prize_emoji": prize_dict["prize_emoji"],
+            "prize_type": prize_dict["prize_type"],
+            "sponsor_name": prize_dict["sponsor_name"],
+            "sponsor_organization_name": prize_dict["sponsor_organization_name"],
+            "sponsor_organization_square_logo_url": prize_dict["sponsor_organization_square_logo_url"]
         })
     
     cur.close()
@@ -561,22 +574,27 @@ social media, messaging, social network, chat app, community platform, user prof
         prize_placeholders = ','.join(['%s'] * len(project_uuids))
         cur.execute(
             f"""
-            SELECT project_uuid, name, detail, emoji, type, sponsor, sponsor_organization
+            SELECT *
             FROM prize
             WHERE project_uuid IN ({prize_placeholders})
         """, project_uuids)
-
+        
+        prize_columns = [desc[0] for desc in cur.description]
         for row in cur.fetchall():
             project_uuid = row[0]
             if project_uuid not in prizes_map:
                 prizes_map[project_uuid] = []
+            prize_dict = dict(zip(prize_columns, row))
             prizes_map[project_uuid].append({
-                "name": row[1],
-                "detail": row[2],
-                "emoji": row[3],
-                "type": row[4],
-                "sponsor": row[5],
-                "sponsor_organization": row[6]
+                "project_uuid": prize_dict["project_uuid"],
+                "name": prize_dict["name"],
+                "pool_prize": prize_dict["pool_prize"],
+                "prize_name": prize_dict["prize_name"],
+                "prize_emoji": prize_dict["prize_emoji"],
+                "prize_type": prize_dict["prize_type"],
+                "sponsor_name": prize_dict["sponsor_name"],
+                "sponsor_organization_name": prize_dict["sponsor_organization_name"],
+                "sponsor_organization_square_logo_url": prize_dict["sponsor_organization_square_logo_url"]
             })
 
     cur.close()

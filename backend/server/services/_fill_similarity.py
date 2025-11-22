@@ -52,7 +52,7 @@ async def process_one(uuid_1: str, es: AsyncElasticsearch, index: str,
 async def fill_similarity(
         db_connection: psycopg2.extensions.connection,
         es: AsyncElasticsearch,
-        threshold: float = 0.0,  # lowered threshold
+        threshold: float = 0.5,  # lowered threshold
         batch_size: int = 50  # concurrency level
 ):
 
