@@ -1,21 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { notFound } from "next/navigation";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getProject, Project } from "@/lib/api";
 import { SimilarProjects } from "./SimilarProjects";
-import Image from "next/image";
-import Link from "next/link";
+import { MediaCarousel } from "./MediaCarousel";
 
 
 export default async function ProjectPage({
@@ -32,37 +24,11 @@ export default async function ProjectPage({
   return (
     <main className="min-h-screen w-full pb-8">
       <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        {/* Images at the very top */}
-        {project.screenshots && project.screenshots.length > 0 && (
-          <Carousel className="w-full" opts={{ align: "start", loop: true }}>
-            <CarouselContent className="-ml-1">
-				<CarouselItem className="pl-1 md:basis-1/2">
-                  <div className="overflow-hidden rounded-lg">
-                    <video
-                      src={project.video_mux_url}
-                      className="aspect-video w-full object-cover"
-					  controls
-                    />
-                  </div>
-                </CarouselItem>
-              {project.screenshots.map((screenshot, idx) => (
-                <CarouselItem key={idx} className="pl-1 md:basis-1/2">
-                  <div className="overflow-hidden rounded-lg">
-                    <Image
-                      src={screenshot}
-                      alt={`${project.name} screenshot ${idx + 1}`}
-                      className="aspect-video w-full object-cover"
-					  width={400}
-					  height={400}
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="-left-2 sm:-left-4 cursor-pointer" />
-            <CarouselNext className="-right-2 sm:-right-4 cursor-pointer" />
-          </Carousel>
-        )}
+        <MediaCarousel
+          screenshots={project.screenshots || []}
+          videoUrl={project.video_mux_url}
+          projectName={project.name}
+        />
 
          {/* Header */}
          <div className="space-y-4">
