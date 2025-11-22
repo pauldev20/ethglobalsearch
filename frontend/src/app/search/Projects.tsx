@@ -1,56 +1,19 @@
-import { Project } from "next/dist/build/swc/types";
+import { searchProjects, SearchResponse, Project } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import Link from "next/link";
 
-interface ProjectData {
-	uuid: string;
-	score: number;
-	name: string;
-	tagline: string;
-	description: string;
-	how_its_made: string;
-	source_code_url: string;
-	event_name: string;
-	logo_url: string;
-	banner_url: string;
-	highlights: { [key: string]: string[] };
-}
-
-interface Response {
-	results: ProjectData[];
-	pagination: {
-		page: number;
-		page_size: number;
-		total: number;
-		total_pages: number;
-	};
-}
 
 export async function ProjectsComponent({ query, page }: { query: string, page: number }) {
-	const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/search`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			// event_name: null,
-			// prize_type: null,
-			// sponsor_organization: null,
-			query: query,
-			page: page,
-			page_size: 50,
-		}),
-	});
-	const jsonData: Response = await response.json();
+	const jsonData: SearchResponse = await searchProjects(query, page, 12);
 	const data = jsonData.results;
 
 	return (
 		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-			{data.map((project: ProjectData) => (
-				<a 
+			{data.map((project: Project) => (
+				<Link
 					key={project.uuid}
 					href={`/search/${project.uuid}`}
-					className="group block"
 				>
 					<Card className="overflow-hidden border-2 bg-card transition-all hover:shadow-xl hover:border-foreground/20 h-full">
 						{/* Project Image */}
@@ -84,7 +47,7 @@ export async function ProjectsComponent({ query, page }: { query: string, page: 
 							</div>
 						</div>
 					</Card>
-				</a>
+				</Link>
 			))}
 		</div>
 	);

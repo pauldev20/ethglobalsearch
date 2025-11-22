@@ -1,7 +1,6 @@
 "use client";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { parseAsInteger, useQueryState } from "nuqs";
 import { SearchBar } from "@/components/SearchBar";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from 'use-debounce';

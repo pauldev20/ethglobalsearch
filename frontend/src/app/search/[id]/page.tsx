@@ -12,30 +12,10 @@ import { notFound } from "next/navigation";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getProject, Project } from "@/lib/api";
+import { SimilarProjects } from "./SimilarProjects";
+import Link from "next/link";
 
-interface Prize {
-  name: string;
-  detail: string;
-  emoji: string;
-  type: string;
-  sponsor: string;
-  sponsor_organization: string;
-}
-
-interface Project {
-  uuid: string;
-  slug: string;
-  name: string;
-  tagline: string;
-  description: string;
-  how_its_made: string;
-  source_code_url: string;
-  event_name: string;
-  logo_url: string;
-  banner_url: string;
-  images?: string[];
-  prizes: Prize[];
-}
 
 export default async function ProjectPage({
   params,
@@ -43,8 +23,7 @@ export default async function ProjectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/project?uuid=${id}`, {});
-  const project: Project = await result.json();
+  const project: Project = await getProject(id);
 
   if (!project) notFound();
 
@@ -186,6 +165,8 @@ export default async function ProjectPage({
             </Card>
           )}
         </div>
+
+		<SimilarProjects uuid={id} />
       </section>
     </main>
   );
