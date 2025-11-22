@@ -13,15 +13,24 @@ interface Prize {
 
 export interface Project {
 	uuid: string;
+	slug: string;
+	emoji: string;
 	name: string;
 	tagline: string;
 	description: string;
 	how_its_made: string;
 	source_code_url: string;
+	url: string;
 	event_name: string;
 	logo_url: string;
 	banner_url: string;
+	screenshots: string[];
+	video_file_url: string;
+	video_mux_url: string;
+	video_mux_thumbnail_url: string;
+	primary_repository_url: string;
 	prizes: Prize[];
+	score: number;
 }
 
 export interface SimilarProject {

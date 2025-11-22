@@ -2,8 +2,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext
 import { getSimilarProjects, Project } from "@/lib/api";
 
 export async function SimilarProjects({ uuid }: { uuid: string }) {
-	const projects: Project[] = await getSimilarProjects(uuid);
-	console.log(projects);
+	const projects = await getSimilarProjects(uuid);
 
 	return (
 		<Carousel
