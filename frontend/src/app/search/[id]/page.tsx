@@ -1,20 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { notFound } from "next/navigation";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getProject, Project } from "@/lib/api";
 import { SimilarProjects } from "./SimilarProjects";
-import Link from "next/link";
+import { MediaCarousel } from "./MediaCarousel";
 
 
 export default async function ProjectPage({
@@ -26,31 +19,14 @@ export default async function ProjectPage({
   const project: Project = await getProject(id);
   if (!project) notFound();
 
-  const demoUrl = undefined;
-
   return (
     <main className="min-h-screen w-full pb-8">
       <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        {/* Images at the very top */}
-        {/* {images && images.length > 0 && (
-          <Carousel className="w-full" opts={{ align: "start", loop: true }}>
-            <CarouselContent className="-ml-1">
-              {images.map((image, idx) => (
-                <CarouselItem key={idx} className="pl-1 md:basis-1/2">
-                  <div className="overflow-hidden rounded-lg">
-                    <img
-                      src={image}
-                      alt={`${name} screenshot ${idx + 1}`}
-                      className="aspect-video w-full object-cover"
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="-left-2 sm:-left-4" />
-            <CarouselNext className="-right-2 sm:-right-4" />
-          </Carousel>
-        )} */}
+        <MediaCarousel
+          screenshots={project.screenshots || []}
+          videoUrl={project.video_mux_url}
+          projectName={project.name}
+        />
 
          {/* Header */}
          <div className="space-y-4">
@@ -76,11 +52,11 @@ export default async function ProjectPage({
              </div>
 
              {/* Right: CTAs - Desktop only */}
-             {(demoUrl || project.source_code_url) && (
+             {(project.url || project.source_code_url) && (
                <div className="hidden sm:flex gap-3 shrink-0">
-                 {demoUrl && (
+                 {project.url && (
                    <Button asChild size="default" className="gap-2">
-                     <a href={demoUrl} target="_blank" rel="noopener noreferrer">
+                     <a href={project.url} target="_blank" rel="noopener noreferrer">
                        <FontAwesomeIcon icon={faGlobe} className="h-4 w-4" />
                        <span>Live Demo</span>
                      </a>
@@ -111,19 +87,20 @@ export default async function ProjectPage({
                    variant="default"
                    className="gap-1 px-2 py-1 text-xs"
                  >
-                   <span>{prize.emoji}</span>
-                   <span>{prize.detail}</span>
+					{prize.prize_emoji && <span>{prize.prize_emoji}</span>}
+					{!prize.prize_emoji && <img src={prize.sponsor_organization_square_logo_url} alt={prize.sponsor_name} className="h-4 w-4 rounded-full" />}
+                   	<span>{prize.sponsor_name} - {prize.name}</span>
                  </Badge>
                ))}
              </div>
            )}
 
            {/* Mobile CTAs - Full Width */}
-           {(demoUrl || project.source_code_url) && (
+           {(project.url || project.source_code_url) && (
              <div className="flex flex-col gap-2 sm:hidden">
-               {demoUrl && (
+               {project.url && (
                  <Button asChild size="lg" className="w-full gap-2">
-                   <a href={demoUrl} target="_blank" rel="noopener noreferrer">
+                   <a href={project.url} target="_blank" rel="noopener noreferrer">
                      <FontAwesomeIcon icon={faGlobe} className="h-4 w-4" />
                      <span>Live Demo</span>
                    </a>
