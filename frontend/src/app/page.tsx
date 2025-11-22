@@ -21,7 +21,9 @@ export default function Home() {
           <div className="mx-auto max-w-4xl">
             <div className="group relative">
               <div className="absolute -inset-0.5 rounded-xl bg-linear-to-r from-purple-600 via-blue-600 to-pink-600 blur opacity-0 transition-opacity duration-500 group-hover:opacity-30 group-focus-within:opacity-40 sm:rounded-2xl" />
-              <SearchComponent />
+			  <Suspense fallback={<div className="animate-pulse h-10 w-full bg-muted rounded" />}>
+				<SearchComponent />
+			  </Suspense>
             </div>
           </div>
 
