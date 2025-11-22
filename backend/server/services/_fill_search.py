@@ -124,11 +124,11 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
         should_reuse_embedding = False
         if existing and existing['_source']:
             original_parts = []
-            original_parts.append(existing['_source'].get('name', ''))
-            original_parts.append(existing['_source'].get('tagline', ''))
-            original_parts.append(existing['_source'].get('description', ''))
-            original_parts.append(existing['_source'].get('how_its_made', ''))
-            original_full_text = "\n".join(original_parts)
+            original_parts.append(existing['_source'].get('name'))
+            original_parts.append(existing['_source'].get('tagline'))
+            original_parts.append(existing['_source'].get('description'))
+            original_parts.append(existing['_source'].get('how_its_made'))
+            original_full_text = "\n".join(filter(None, parts))
             original_full_text = shorten_text(original_full_text)
             # Reuse embedding if text hasn't changed and embedding exists
             if original_full_text == full_text and existing['_source'].get(
