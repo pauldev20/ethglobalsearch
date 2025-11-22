@@ -28,7 +28,9 @@ query GetPaginatedSubmittedProjects(
         }
       }
       prizes {
+        name
         prize {
+          name
           sponsor {
             organization {
               squareLogo {

@@ -62,6 +62,7 @@ async def download_projects(event) -> list[dict]:
 
     return all
 
+
 async def download_links() -> list[dict]:
     all = []
     skip = 0
@@ -100,7 +101,7 @@ async def download_links() -> list[dict]:
         all.extend(
             res.json()["data"]["getPaginatedSubmittedProjects"]["items"])
         if len(res.json()["data"]["getPaginatedSubmittedProjects"]
-                           ["items"]) < AMOUNT:
+               ["items"]) < AMOUNT:
             break
 
     return all
