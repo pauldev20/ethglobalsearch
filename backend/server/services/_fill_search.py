@@ -2,6 +2,7 @@ import psycopg2
 import elasticsearch
 from elasticsearch import NotFoundError
 from openai import AsyncOpenAI
+import tiktoken
 
 
 INDEX = "documents"
@@ -36,15 +37,25 @@ MAPPING = {
 }
 
 
+def shorten_text(text: str) -> str:
+    encoding = tiktoken.encoding_for_model("text-embedding-3-small")
+    MAX_TOKENS = 8000
+    tokens = encoding.encode(text)
+    if len(tokens) > MAX_TOKENS:
+        truncated_tokens = tokens[:MAX_TOKENS]
+        return encoding.decode(truncated_tokens)
+    return text
+
+
 async def generate_embedding(openai_client: AsyncOpenAI,
                              text: str) -> list[float]:
     """Generate an embedding for the given text."""
-    # limit to 8000 tokens
-    if len(text) > 8000 * 3:
-        text = text[:8000 * 3]
-    response = await openai_client.embeddings.create(
-        model="text-embedding-3-small", input=text)
-    return response.data[0].embedding
+    try:
+        response = await openai_client.embeddings.create(
+            model="text-embedding-3-small", input=text)
+        return response.data[0].embedding
+    except Exception as e:
+        return [0]
 
 
 async def ensure_index(es: elasticsearch.Elasticsearch):
@@ -79,7 +90,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
 
         # Fetch all prizes grouped by project
         cur.execute("""
-            SELECT project_uuid, type, sponsor_organization
+            SELECT project_uuid, prize_type, sponsor_organization_name
             FROM prize
             ORDER BY project_uuid
         """)
@@ -107,6 +118,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
         # prepare full text for embedding
         parts = [name, tagline, description, how_its_made]
         full_text = "\n".join(filter(None, parts))
+        full_text = shorten_text(full_text)
 
         # Check if we can reuse the existing embedding
         should_reuse_embedding = False
@@ -117,7 +129,7 @@ async def fill_search(db_connection: psycopg2.extensions.connection,
             original_parts.append(existing['_source'].get('description', ''))
             original_parts.append(existing['_source'].get('how_its_made', ''))
             original_full_text = "\n".join(original_parts)
-
+            original_full_text = shorten_text(original_full_text)
             # Reuse embedding if text hasn't changed and embedding exists
             if original_full_text == full_text and existing['_source'].get(
                     'raw_embedding') is not None:
