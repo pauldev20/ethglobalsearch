@@ -12,6 +12,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG API_URL
+ENV API_URL=${API_URL}
 
 RUN bun run build
 
@@ -19,6 +21,8 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG API_URL
+ENV API_URL=${API_URL}
 
 ENV NODE_ENV=production \
     PORT=3000 \
