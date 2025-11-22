@@ -98,7 +98,7 @@ async def fill_similarity(
         await asyncio.to_thread(write_to_db)
 
         print(
-            f"Processed {start + len(batch)}/{len(uuids)} projects - stored {total_inserted}"
+            f"Processed {start + len(batch)}/{len(uuids)} projects - stored {total_inserted}", flush=True
         )
 
     cur.close()
