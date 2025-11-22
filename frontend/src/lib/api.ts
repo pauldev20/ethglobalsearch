@@ -74,7 +74,7 @@ export interface GraphData {
 /*                                 Endpoints                                 */
 /* -------------------------------------------------------------------------- */
 
-export const API_URL = process.env.API_URL;
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const getSimilarProjects = async (uuid: string) => {
 	const response = await fetch(`${API_URL}/similar?uuid=${uuid}`, {
