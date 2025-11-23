@@ -17,6 +17,7 @@ export function ClearFilters() {
 		params.delete('organizations');
 		params.delete('page');
 		replace(`${pathname}?${params.toString()}`);
+		window.location.reload();
 	};
 
 	return (
