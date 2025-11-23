@@ -14,8 +14,10 @@ export function Search() {
 		const params = new URLSearchParams(searchParams);
 		if (query) {
 			params.set("q", query);
+			params.delete('page');
 		} else {
 			params.delete("q");
+			params.delete('page');
 		}
 		replace(`${pathname}?${params.toString()}`);
 	}, 500);

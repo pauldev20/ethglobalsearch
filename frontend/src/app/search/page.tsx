@@ -3,6 +3,7 @@ import { SearchHeader } from "./SearchHeader";
 import { getTypes } from "@/lib/api";
 import { Suspense } from "react";
 
+
 export default async function Search(props: {
   searchParams?: Promise<{
     q?: string;
@@ -22,19 +23,14 @@ export default async function Search(props: {
 	const typesData = await getTypes();
 
     return (
-        <main className="w-full min-h-full">
-			<SearchHeader typesData={typesData} />
+        <main className="flex-1 w-full min-h-full">
+			<SearchHeader typesData={typesData} query={query} events={events} types={types} organizations={organizations} />
 
 			{/* Projects Grid */}
 			<div className="max-w-7xl mx-auto px-4 pb-8">
 				<Suspense key={query + currentPage + events + types + organizations} fallback={<ProjectsGrid />}>
 					<ProjectsGrid query={query} page={currentPage} events={events} types={types} organizations={organizations} />
 				</Suspense>
-
-				{/* Pagination */}
-				<div className="mt-12 flex justify-center">
-					{/* <PaginationComponent currentPage={currentPage} totalPages={totalPages} handlePageChange={handlePageChange} /> */}
-				</div>
 			</div>
         </main>
     );

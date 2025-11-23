@@ -76,10 +76,11 @@ async def fill_similarity(
     for start in range(0, len(uuids), batch_size):
         batch = uuids[start:start + batch_size]
 
-        # run ES work concurrently
-        results = await asyncio.gather(*(process_with_limit(uuid_1)
-                                         for uuid_1 in batch))
-
+        results = []
+        for uuid_1 in batch:
+            print(uuid_1)
+            result = await process_with_limit(uuid_1)
+            results.append(result)
         # sync DB writes in a background thread
         def write_to_db():
             nonlocal total_inserted
@@ -98,8 +99,8 @@ async def fill_similarity(
         await asyncio.to_thread(write_to_db)
 
         print(
-            f"Processed {start + len(batch)}/{len(uuids)} projects - stored {total_inserted}", flush=True
-        )
+            f"Processed {start + len(batch)}/{len(uuids)} projects - stored {total_inserted}",
+            flush=True)
 
     cur.close()
     return total_inserted

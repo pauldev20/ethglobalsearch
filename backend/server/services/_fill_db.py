@@ -15,21 +15,21 @@ def fill_db(db_connection: psycopg2.extensions.connection, projects: list[dict])
         event_name = (project.get("event") or {}).get("name", "")
         logo_url = ((project.get("logo") or {}).get("file") or {}).get("fullUrl")
         banner_url = ((project.get("banner") or {}).get("file") or {}).get("fullUrl")
-        
+
         # Extract screenshots as array of URLs
         screenshots = []
         for screenshot in project.get("screenshots", []):
             screenshot_url = ((screenshot.get("file") or {}).get("fullUrl"))
             if screenshot_url:
                 screenshots.append(screenshot_url)
-        
+
         # Extract video information
         video = project.get("video") or {}
         video_file_url = ((video.get("file") or {}).get("fullUrl"))
         video_mux_url = video.get("muxUrl")
         video_mux_thumbnail_url = video.get("muxThumbnailUrl")
         video_youtube_id = video.get("youtubeId")
-        
+
         # Extract primary repository URL
         primary_repository_url = ((project.get("primaryRepository") or {}).get("url"))
 
@@ -69,11 +69,11 @@ def fill_db(db_connection: psycopg2.extensions.connection, projects: list[dict])
             name = prize.get("name", "") or ""
             pool_prize = prize.get("poolPrize")
             prize_data = prize.get("prize", {}) or {}
-            
+
             prize_name = prize_data.get("name")
             prize_emoji = prize_data.get("emoji")
             prize_type = prize_data.get("type")
-            
+
             sponsor = prize_data.get("sponsor") or {}
             sponsor_name = sponsor.get("name")
             sponsor_org = sponsor.get("organization") or {}
@@ -105,12 +105,52 @@ def fill_db_links(db_connection: psycopg2.extensions.connection,
     cur = db_connection.cursor()
     for project in projects:
         uuid = project.get("uuid")
-        logo_url = ((project.get("logo") or {}).get("file") or {}).get("fullUrl")
-        banner_url = ((project.get("banner") or {}).get("file") or {}).get("fullUrl")
+        logo_url = ((project.get("logo") or {}).get("file")
+                    or {}).get("fullUrl")
+        banner_url = ((project.get("banner") or {}).get("file")
+                      or {}).get("fullUrl")
 
-        cur.execute("""
-            UPDATE project SET logo_url = %s, banner_url = %s WHERE uuid = %s
-        """, (logo_url, banner_url, uuid))
+        # Extract screenshots as array of URLs
+        screenshots = []
+        for screenshot in project.get("screenshots", []):
+            screenshot_url = ((screenshot.get("file") or {}).get("fullUrl"))
+            if screenshot_url:
+                screenshots.append(screenshot_url)
+
+        # Extract video information
+        video = project.get("video") or {}
+        video_file_url = ((video.get("file") or {}).get("fullUrl"))
+
+        cur.execute(
+            """
+            UPDATE project SET 
+                logo_url = %s, 
+                banner_url = %s,
+                screenshots = %s,
+                video_file_url = %s
+            WHERE uuid = %s
+        """, (logo_url, banner_url, screenshots, video_file_url, uuid))
+
+        # Update prizes with square logo URLs
+        prizes = project.get("prizes", [])
+        for prize in prizes:
+            name = prize.get("name", "") or ""
+            prize_data = prize.get("prize", {}) or {}
+            sponsor = prize_data.get("sponsor") or {}
+            sponsor_org = sponsor.get("organization") or {}
+            sponsor_organization_square_logo_url = ((
+                sponsor_org.get("squareLogo") or {}).get("fullUrl"))
+            # Get prize_name for the conflict resolution
+            prize_name = prize_data.get("name")
+
+            if prize_name:  # Only update if we have a prize_name to match on
+                cur.execute(
+                    """
+                    UPDATE prize SET 
+                        sponsor_organization_square_logo_url = %s
+                    WHERE project_uuid = %s 
+                      AND name = %s 
+                """, (sponsor_organization_square_logo_url, uuid, name))
 
     db_connection.commit()
     cur.close()

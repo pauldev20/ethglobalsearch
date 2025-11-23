@@ -16,6 +16,30 @@ query GetPaginatedSubmittedProjects(
           fullUrl
         }
       }
+      screenshots {
+        rank
+        file {
+          fullUrl
+        }
+      }
+      video {
+        file {
+          fullUrl
+        }
+      }
+      prizes {
+        name
+        prize {
+          name
+          sponsor {
+            organization {
+              squareLogo {
+                fullUrl
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

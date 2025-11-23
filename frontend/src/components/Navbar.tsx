@@ -1,7 +1,7 @@
 "use client";
 
-import { pageData } from "@/pageData";
 import { useState } from "react";
+import Image from "next/image";
 
 export function Navbar() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -11,8 +11,7 @@ export function Navbar() {
 			<div className="max-w-7xl mx-auto px-6 lg:px-8 w-full relative flex h-16 flex-row items-center justify-between">
 				{/* Logo */}
 				<a href="/" className="absolute left-[1.6rem] flex items-center gap-3 group">
-					<span className="text-3xl transition-transform group-hover:scale-110 duration-200">{pageData.icon}</span>
-					<span className="text-xl font-bold text-foreground">{pageData.title}</span>
+					<Image src="/ETHSearch.png" alt="Logo" width={150} height={100} />
 				</a>
 
 				{/* Mobile Menu Button */}
@@ -62,7 +61,10 @@ export function Navbar() {
 								href="/chat"
 								onClick={() => setMobileMenuOpen(false)}
 							>
-								<span>Chat</span>
+								<span>
+									Ask Talwar
+									<span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-xs -translate-y-2 font-semibold text-green-800 ml-1">New</span>
+								</span>
 							</a>
 						</li>
 					</div>
@@ -82,7 +84,10 @@ export function Navbar() {
 					</li>
 					<li className="font-medium transition-opacity hover:opacity-60 lg:text-[1.1rem]">
 						<a href="/chat">
-							<span>Chat</span>
+							<span>
+								Ask Talwar
+								<span className="inline-flex items-center rounded-full bg-green-100 px-1.5 py-0.5 text-xs -translate-y-2 font-semibold text-green-800 ml-1">New</span>
+							</span>
 						</a>
 					</li>
 				</ul>

@@ -1,130 +1,179 @@
 "use client";
 
 import { useState } from "react";
-import { chatQuery, type SearchResponse } from "@/lib/api";
-import { ProjectCard } from "@/app/search/ProjectCard";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { DotPattern } from "@/components/ui/dot-pattern";
+import { Card } from "@/components/ui/card";
+import { sendChatMessage } from "./actions";
+import { Project } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { RenderedText } from "@/components/RenderedText";
 
-export default function ChatPage() {
-	const [query, setQuery] = useState("");
-	const [results, setResults] = useState<SearchResponse | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+  projects: Project[];
+};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!query.trim()) return;
+const INITIAL_MESSAGES: Message[] = [
+  {
+    role: "assistant",
+    content:
+      "Hello! Ask me anything about ETHGlobal projects and I'll help you find what you're looking for.",
+    projects: [],
+  },
+];
 
-		setLoading(true);
-		setError(null);
-		setResults(null);
+export default function Chat() {
+  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-		try {
-			const response = await chatQuery(query);
-			setResults(response);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to process query");
-		} finally {
-			setLoading(false);
-		}
-	};
+  const addMessage = (message: Message) =>
+    setMessages((prev) => [...prev, message]);
 
-	return (
-		<>
-			<DotPattern
-				className={cn(
-					"mask-[radial-gradient(500px_circle_at_center,white,transparent)]",
-					"sm:mask-[radial-gradient(600px_circle_at_center,white,transparent)]",
-					"-z-10",
-				)}
-			/>
+  const handleSend = async () => {
+    const text = input.trim();
+    if (!text || isLoading) return;
 
-			<main className="relative flex-1 flex w-full flex-col items-center justify-center py-8 sm:py-16">
-				<div className="relative z-10 w-full max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-					{/* Header */}
-					<div className="text-center space-y-4">
-						<h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">
-							AI Chat Search
-						</h1>
-						<p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
-							Ask questions in natural language and find relevant projects powered by 0G AI
-						</p>
-					</div>
+    addMessage({ role: "user", content: text, projects: [] });
+    setInput("");
+    setIsLoading(true);
 
-					{/* Search Form */}
-					<div className="mx-auto max-w-4xl">
-						<form onSubmit={handleSubmit} className="space-y-4">
-							<div className="group relative">
-								<div className="absolute -inset-0.5 rounded-xl bg-linear-to-r from-purple-600 via-blue-600 to-pink-600 blur opacity-0 transition-opacity duration-500 group-hover:opacity-30 group-focus-within:opacity-40 sm:rounded-2xl" />
-								<div className="relative backdrop-blur-xl bg-white/90 rounded-xl sm:rounded-2xl shadow-2xl shadow-purple-500/10 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 group-focus-within:shadow-purple-500/20 group-focus-within:ring-purple-500/30">
-									<textarea
-										value={query}
-										onChange={(e) => setQuery(e.target.value)}
-										placeholder="Ask me anything... e.g., 'Show me projects like Facebook' or 'Find DeFi protocols with lending'"
-										className="block w-full min-h-[120px] px-5 py-4 text-base md:text-lg appearance-none bg-transparent focus:outline-none transition-all placeholder:text-muted-foreground/60 resize-none"
-										disabled={loading}
-									/>
-								</div>
-							</div>
-							<div className="flex justify-center">
-								<Button
-									type="submit"
-									size="lg"
-									disabled={loading || !query.trim()}
-									className="min-w-[120px]"
-								>
-									{loading ? "Searching..." : "Search"}
-								</Button>
-							</div>
-						</form>
-					</div>
+    try {
+      const res = await sendChatMessage(text);
+      addMessage({
+        role: "assistant",
+        content: res.message ?? "No response.",
+        projects: res.projects ?? [],
+      });
+    } catch {
+      addMessage({
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please try again.",
+        projects: [],
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-					{/* Error Message */}
-					{error && (
-						<div className="mx-auto max-w-4xl">
-							<div className="rounded-xl border-2 border-destructive/50 bg-destructive/10 p-4 text-center">
-								<p className="text-destructive font-medium">{error}</p>
-							</div>
-						</div>
-					)}
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
-					{/* Loading State */}
-					{loading && (
-						<div className="mx-auto max-w-7xl">
-							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-								{[...Array(4)].map((_, i) => (
-									<ProjectCard key={i} />
-								))}
-							</div>
-						</div>
-					)}
+  return (
+    <>
+      <main className="relative flex-1 flex w-full flex-col items-center justify-center p-4 sm:p-8">
+        <div className="relative z-10 w-full max-w-4xl h-[calc(100vh-12rem)]">
+          <Card className="flex flex-col h-full py-0">
+            {/* Header */}
+            <div className="border-b px-6 py-4">
+              <h1 className="text-2xl font-bold">Kartik Talwar</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Ask me anything about projects
+              </p>
+            </div>
 
-					{/* Results */}
-					{results && !loading && (
-						<div className="space-y-6">
-							<div className="text-center">
-								<p className="text-muted-foreground">
-									Found {results.pagination.total} result{results.pagination.total !== 1 ? "s" : ""}
-								</p>
-							</div>
-							{results.results.length > 0 ? (
-								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-									{results.results.map((project) => (
-										<ProjectCard key={project.uuid} project={project} />
-									))}
-								</div>
-							) : (
-								<div className="text-center py-12">
-									<p className="text-muted-foreground">No projects found. Try a different query.</p>
-								</div>
-							)}
-						</div>
-					)}
-				</div>
-			</main>
-		</>
-	);
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              {messages.map((message, idx) => {
+                const isUser = message.role === "user";
+
+                return (
+                  <div
+                    key={idx}
+                    className={cn("flex", isUser ? "justify-end" : "justify-start")}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-[80%] rounded-lg px-4 py-3 text-sm",
+                        isUser
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted",
+                      )}
+                    >
+						<RenderedText text={message.content} />
+                      {!!message.projects.length && (
+                        <div className="mt-4 -mx-4 -mb-3">
+                          <div className="flex gap-3 overflow-x-auto pb-3 px-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                            {message.projects.map((project) => (
+                              <Link
+                                key={project.uuid}
+                                href={`/search/${project.uuid}`}
+                                className="shrink-0 w-64 group"
+                              >
+                                <div className="border rounded-lg overflow-hidden bg-background hover:shadow-lg transition-shadow h-full">
+                                  {/* Project Image */}
+                                  <div className="w-full h-36 bg-gray-100 relative overflow-hidden">
+                                    {project.logo_url ? (
+                                      <img
+                                        src={project.logo_url}
+                                        alt={project.name}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-4xl">
+                                        {project.emoji || "🚀"}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Project Info */}
+                                  <div className="p-3">
+                                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">
+                                      {project.name}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground line-clamp-2">
+                                      {project.tagline}
+                                    </p>
+                                  </div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-[80%] rounded-lg px-4 py-3 bg-muted text-sm">
+                    Thinking…
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Input */}
+            <div className="border-t px-6 py-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+				  name="message"
+				  id="message"
+                  value={input}
+				  autoComplete="off"
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your message..."
+                  className="flex-1 px-4 py-2 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  disabled={isLoading}
+                />
+                <Button onClick={handleSend} disabled={!input.trim() || isLoading}>
+                  {isLoading ? "Sending..." : "Send"}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </main>
+    </>
+  );
 }
-

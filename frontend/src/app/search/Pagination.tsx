@@ -1,3 +1,5 @@
+'use client';
+
 import {
 	Pagination,
 	PaginationContent,
@@ -7,8 +9,20 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export function PaginationComponent({ currentPage, totalPages, handlePageChange }: { currentPage: number, totalPages: number, handlePageChange: (page: number) => void }) {
+
+export function PaginationComponent({ currentPage, totalPages }: { currentPage: number, totalPages: number }) {
+	const searchParams = useSearchParams();
+  	const pathname = usePathname();
+  	const { replace } = useRouter();
+
+	const handlePageChange = (page: number) => {
+		const params = new URLSearchParams(searchParams);
+		params.set('page', page.toString());
+		replace(`${pathname}?${params.toString()}`);
+	};
+
 	return (
 		<Pagination>
 			<PaginationContent>
