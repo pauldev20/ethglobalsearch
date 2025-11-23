@@ -18,8 +18,7 @@ type Message = {
 const INITIAL_MESSAGES: Message[] = [
   {
     role: "assistant",
-    content:
-      "Hello! I can help you find similar projects to the ones your thinking of!",
+    content: `Yo! 👋 Ready to ship something massive?\n\nI’ve indexed the entire history of ETHGlobal. Don't waste your weekend reinventing the wheel, let's make sure your idea is fresh.\n\nTell me what you're thinking of building (even if it's just a vague vibe), and I'll find the top projects that paved the way.\n\n**What are we hacking on today?**`,
     projects: [],
   },
 ];
@@ -44,13 +43,13 @@ export default function Chat() {
       const res = await sendChatMessage(text);
       addMessage({
         role: "assistant",
-        content: res.message ?? "No response.",
+        content: res.message ?? "404: Zero Alpha Found. We dug through the whole archive and found nothing. Good news: That means you might be the first to build this. Go ship it.",
         projects: res.projects ?? [],
       });
     } catch {
       addMessage({
         role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
+        content: "Execution Reverted. The search transaction ran out of gas. We’re rolling back the state, try that query again or contact us.",
         projects: [],
       });
     } finally {
