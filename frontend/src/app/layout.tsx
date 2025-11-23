@@ -37,7 +37,7 @@ export default function RootLayout({
                 <Navbar />
                 {children}
             </body>
-			{process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && process.env.NEXT_PUBLIC_UMAMI_URL && (
+            {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && process.env.NEXT_PUBLIC_UMAMI_URL && (
                 <Script
                     async={true}
                     defer={true}

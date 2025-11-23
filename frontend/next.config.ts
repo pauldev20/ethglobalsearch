@@ -1,16 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	output: "standalone",
-	images: {
-		remotePatterns: [
-		  {
-			protocol: 'https',
-			hostname: '*.cloudflarestorage.com',
-		  },
-		],
-	},
-	async rewrites() {
+    output: "standalone",
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "*.cloudflarestorage.com",
+            },
+        ],
+    },
+    async rewrites() {
         if (process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && process.env.NEXT_PUBLIC_UMAMI_URL) {
             return [
                 {
