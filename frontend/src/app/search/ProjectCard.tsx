@@ -152,8 +152,8 @@ export function ProjectCard({ project, highlights }: { project?: Project; highli
                     {/* Prizes - Fixed height at bottom */}
                     <div className="pt-2 border-t border-border/40 h-[34px] flex items-center overflow-hidden">
                         <div className="flex gap-1.5 items-center overflow-scroll">
-                            {project.prizes.map((prize) => (
-                                <Badge key={prize.prize_name} className="text-xs whitespace-nowrap">
+                            {project.prizes.map((prize, index) => (
+                                <Badge key={`${prize.prize_name}-${index}`} className="text-xs whitespace-nowrap">
                                     {prize.sponsor_organization_square_logo_url ? (
                                         <Image
                                             src={prize.sponsor_organization_square_logo_url}
