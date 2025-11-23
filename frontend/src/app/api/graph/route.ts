@@ -9,6 +9,12 @@ export async function POST(request: Request) {
     const organizations = body.organizations;
     const threshold = body.threshold;
 
-    const graphData = await getGraph(query ?? "", events ?? "", types ?? "", organizations ?? "", Number(threshold ?? 0.82));
+    const graphData = await getGraph(
+        query ?? "",
+        events ?? "",
+        types ?? "",
+        organizations ?? "",
+        Number(threshold ?? 0.82),
+    );
     return NextResponse.json(graphData);
 }

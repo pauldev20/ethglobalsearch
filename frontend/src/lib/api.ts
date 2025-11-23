@@ -34,7 +34,7 @@ export interface Project {
     primary_repository_url: string;
     prizes: Prize[];
     score: number;
-	// biome-ignore lint/suspicious/noExplicitAny: no other way
+    // biome-ignore lint/suspicious/noExplicitAny: no other way
     highlights: { [key: string]: any };
 }
 

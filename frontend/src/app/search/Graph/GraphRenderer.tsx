@@ -1,8 +1,8 @@
 "use client";
 
 import { type GraphData, getGraphNext } from "@/lib/api";
-import GraphComponent from "./GraphComponent";
 import { useEffect, useState } from "react";
+import GraphComponent from "./GraphComponent";
 
 export default function GraphRenderer({
     query,
@@ -10,7 +10,7 @@ export default function GraphRenderer({
     types,
     organizations,
 }: { query: string; events: string; types: string; organizations: string }) {
-	const [graphData, setGraphData] = useState<GraphData | undefined>(undefined);
+    const [graphData, setGraphData] = useState<GraphData | undefined>(undefined);
     useEffect(() => {
         getGraphNext(query, events, types, organizations, 0.82).then((data) => {
             setGraphData(data);

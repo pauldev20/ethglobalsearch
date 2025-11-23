@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import GraphRenderer from "./GraphRenderer";
 import { Suspense } from "react";
 import { useState } from "react";
+import GraphRenderer from "./GraphRenderer";
 
 export default function GraphModal({
     query,
@@ -15,7 +15,7 @@ export default function GraphModal({
     organizations,
     className,
 }: { query: string; events: string; types: string; organizations: string; className: string }) {
-	const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
         <div className={cn("flex flex-col gap-1", className)}>
@@ -45,9 +45,22 @@ export default function GraphModal({
                             </Dialog.Close>
                         </header>
 
-						{isOpen && <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading graph data...</div>}>
-                        	<GraphRenderer query={query} events={events} types={types} organizations={organizations} />
-						</Suspense>}
+                        {isOpen && (
+                            <Suspense
+                                fallback={
+                                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                                        Loading graph data...
+                                    </div>
+                                }
+                            >
+                                <GraphRenderer
+                                    query={query}
+                                    events={events}
+                                    types={types}
+                                    organizations={organizations}
+                                />
+                            </Suspense>
+                        )}
                     </Dialog.Content>
                 </Dialog.Portal>
             </Dialog.Root>
