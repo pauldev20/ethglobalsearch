@@ -21,7 +21,7 @@ sequenceDiagram
     participant User
 
     Note over EthGlobal,LLM: Data Ingestion Phase
-    EthGlobal->>Postgres: Download project and price data
+    EthGlobal->>Postgres: Download project and prize data
     Postgres->>Elasticsearch: Create index from data
     Elasticsearch->>LLM: Request embeddings for indexed data
     LLM-->>Elasticsearch: Return embeddings

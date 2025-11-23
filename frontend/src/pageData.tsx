@@ -1,5 +1,5 @@
 export const pageData = {
-	icon: "🔎",
+    icon: "🔎",
     title: "ETHGlobal Search",
     description: "Improved Showcase for ETHGlobal",
 };

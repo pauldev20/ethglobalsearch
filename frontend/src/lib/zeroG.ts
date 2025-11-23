@@ -1,11 +1,11 @@
-import { ethers } from "ethers";
 import { createZGComputeNetworkBroker } from "@0glabs/0g-serving-broker";
+import { ethers } from "ethers";
 import OpenAI from "openai";
 
 const OFFICIAL_PROVIDERS = {
     "llama-3.3-70b-instruct": "0xf07240Efa67755B5311bc75784a061eDB47165Dd",
     "deepseek-r1-70b": "0x3feE5a4dd5FDb8a32dDA97Bed899830605dBD9D3",
-    "qwen2.5-vl-72b-instruct": "0x6D233D2610c32f630ED53E8a7Cbf759568041f8f"
+    "qwen2.5-vl-72b-instruct": "0x6D233D2610c32f630ED53E8a7Cbf759568041f8f",
 };
 
 // Singleton instances to reuse across requests in the same container
@@ -69,7 +69,7 @@ export async function expandQueryWith0G(query: string): Promise<string> {
         const headers = await broker.inference.getRequestHeaders(selectedProvider, query);
         const requestHeaders: Record<string, string> = {};
         Object.entries(headers).forEach(([key, value]) => {
-            if (typeof value === 'string') {
+            if (typeof value === "string") {
                 requestHeaders[key] = value;
             }
         });
@@ -95,15 +95,18 @@ export async function expandQueryWith0G(query: string): Promise<string> {
       social media, messaging, social network, chat app, community platform, user profiles, feed, timeline, friends list, photo sharing, real-time updates
     `;
 
-        const completion = await openai.chat.completions.create({
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: query }
-            ],
-            model: model,
-        }, {
-            headers: requestHeaders,
-        });
+        const completion = await openai.chat.completions.create(
+            {
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: query },
+                ],
+                model: model,
+            },
+            {
+                headers: requestHeaders,
+            },
+        );
 
         const expandedQuery = completion.choices[0].message.content?.trim() || query;
         const chatId = completion.id;
@@ -117,7 +120,6 @@ export async function expandQueryWith0G(query: string): Promise<string> {
         }
 
         return expandedQuery;
-
     } catch (error) {
         console.error("0G Expansion Error:", error);
         return query; // Fallback

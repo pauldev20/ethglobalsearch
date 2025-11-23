@@ -1,4 +1,4 @@
-'use server'
+"use server";
 
 import { ChatResponse } from "@/lib/api";
 import { getChatResponse } from "@/lib/chat-service";
