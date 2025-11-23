@@ -10,7 +10,6 @@ export async function ProjectsGrid({ query, page, events, types, organizations }
 		const jsonData: SearchResponse | [] = await searchProjects(query, page, 30, events, types, organizations);
 		data = jsonData.results;
 		pagination = jsonData.pagination;
-		console.log(data?.[0].highlights);
 	}
 
 	const startIndex = pagination ? (pagination.page - 1) * pagination.page_size : 0;

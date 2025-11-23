@@ -5,6 +5,10 @@ import { ProjectCard } from "../ProjectCard";
 export async function SimilarProjects({ uuid }: { uuid: string }) {
 	const projects = await getSimilarProjects(uuid);
 
+	if (projects.length === 0) {
+		return null;
+	}
+
 	return (
 		<Carousel
 			opts={{ align: "start", loop: true }}

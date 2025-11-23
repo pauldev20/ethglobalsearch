@@ -5,78 +5,42 @@ import { Card } from "@/components/ui/card";
 import { Project } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 
 
 export function ProjectCard({ project, highlights }: { project?: Project, highlights?: { [key: string]: any } }) {
-	const prizesContainerRef = useRef<HTMLDivElement>(null);
-	const [visiblePrizesCount, setVisiblePrizesCount] = useState<number | null>(null);
-
-	useEffect(() => {
-		if (!project || !prizesContainerRef.current) return;
-
-		const container = prizesContainerRef.current;
-		const containerWidth = container.offsetWidth;
-		const badges = Array.from(container.children) as HTMLElement[];
-		
-		let totalWidth = 0;
-		let count = 0;
-		const gap = 6; // 1.5 * 4px (gap-1.5)
-		const plusBadgeWidth = 48; // estimated width for +n badge
-
-		// Calculate how many badges fit
-		for (let i = 0; i < badges.length; i++) {
-			const badgeWidth = badges[i].offsetWidth;
-			const widthNeeded = totalWidth + badgeWidth + (count > 0 ? gap : 0);
-			
-			// Check if we need to reserve space for +n badge
-			const hasMore = i < badges.length - 1;
-			const spaceNeeded = widthNeeded + (hasMore ? gap + plusBadgeWidth : 0);
-			
-			if (spaceNeeded > containerWidth) {
-				break;
-			}
-			
-			totalWidth = widthNeeded;
-			count++;
-		}
-
-		setVisiblePrizesCount(count);
-	}, [project]);
-	
 	if (!project) {
 		return (
 			<Card className="overflow-hidden border-2 bg-card h-full animate-pulse pt-0 flex flex-col">
 				{/* Skeleton Image */}
 				<div className="aspect-video w-full bg-muted" />
 				
-			{/* Skeleton Info */}
-			<div className="p-5 flex flex-col flex-1">
-				<div className="flex items-start justify-between gap-2 mb-3">
-					<div className="h-7 bg-muted rounded w-3/4" />
-					<div className="h-5 bg-muted rounded w-20" />
+				{/* Skeleton Info */}
+				<div className="p-5 flex flex-col flex-1">
+					<div className="flex items-start justify-between gap-2 mb-3">
+						<div className="h-7 bg-muted rounded w-3/4" />
+						<div className="h-5 bg-muted rounded w-20" />
+					</div>
+					
+					<div className="space-y-2 mb-3">
+						<div className="h-4 bg-muted rounded w-full" />
+						<div className="h-4 bg-muted rounded w-2/3" />
+					</div>
+					
+					<div className="space-y-2 mb-4 min-h-[60px]">
+						<div className="h-3 bg-muted rounded w-full" />
+						<div className="h-3 bg-muted rounded w-5/6" />
+						<div className="h-3 bg-muted rounded w-4/5" />
+					</div>
+					
+					{/* Spacer */}
+					<div className="flex-1"></div>
+					
+					<div className="pt-2 border-t border-border/40 h-[44px] flex items-center gap-1.5">
+						<div className="h-5 bg-muted rounded w-16" />
+						<div className="h-5 bg-muted rounded w-20" />
+						<div className="h-5 bg-muted rounded w-12" />
+					</div>
 				</div>
-				
-				<div className="space-y-2 mb-3">
-					<div className="h-4 bg-muted rounded w-full" />
-					<div className="h-4 bg-muted rounded w-2/3" />
-				</div>
-				
-				<div className="space-y-2 mb-4 min-h-[60px]">
-					<div className="h-3 bg-muted rounded w-full" />
-					<div className="h-3 bg-muted rounded w-5/6" />
-					<div className="h-3 bg-muted rounded w-4/5" />
-				</div>
-				
-				{/* Spacer */}
-				<div className="flex-1"></div>
-				
-				<div className="pt-2 border-t border-border/40 h-[44px] flex items-center gap-1.5">
-					<div className="h-5 bg-muted rounded w-16" />
-					<div className="h-5 bg-muted rounded w-20" />
-					<div className="h-5 bg-muted rounded w-12" />
-				</div>
-			</div>
 			</Card>
 		);
 	}
@@ -174,15 +138,11 @@ export function ProjectCard({ project, highlights }: { project?: Project, highli
 				
 				{/* Prizes - Fixed height at bottom */}
 				<div className="pt-2 border-t border-border/40 h-[34px] flex items-center overflow-hidden">
-					<div ref={prizesContainerRef} className="flex gap-1.5 items-center">
+					<div className="flex gap-1.5 items-center overflow-scroll">
 						{project.prizes.map((prize, index) => (
 							<Badge 
 								key={index} 
 								className="text-xs whitespace-nowrap"
-								style={{ 
-									visibility: visiblePrizesCount === null || index < visiblePrizesCount ? 'visible' : 'hidden',
-									position: visiblePrizesCount !== null && index >= visiblePrizesCount ? 'absolute' : 'relative'
-								}}
 							>
 								{prize.sponsor_organization_square_logo_url
 									? <Image src={prize.sponsor_organization_square_logo_url} alt={prize.sponsor_name} width={16} height={16} className="h-4 w-4 rounded-full bg-white" />
@@ -190,11 +150,6 @@ export function ProjectCard({ project, highlights }: { project?: Project, highli
 								{prize.sponsor_name}
 							</Badge>
 						))}
-						{visiblePrizesCount !== null && visiblePrizesCount < project.prizes.length && (
-							<Badge variant="secondary" className="text-xs shrink-0">
-								+{project.prizes.length - visiblePrizesCount}
-							</Badge>
-						)}
 					</div>
 				</div>
 			</div>
