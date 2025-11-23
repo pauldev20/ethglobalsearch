@@ -183,11 +183,12 @@ export const getGraphNext = async (
 };
 
 export const queryChat = async (query: string) => {
-    const response = await fetch(`${API_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
-    });
-    const data: ChatResponse = await response.json();
-    return data;
+	// Use the local Next.js API route which implements the zeroG provider
+	const response = await fetch(`/api/chat`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ query }),
+	});
+	const data: ChatResponse = await response.json();
+	return data;
 };
