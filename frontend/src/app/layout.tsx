@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
+import Script from "next/script";
 
 import "./globals.css";
 
@@ -36,6 +37,14 @@ export default function RootLayout({
                 <Navbar />
                 {children}
             </body>
+			{process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && process.env.NEXT_PUBLIC_UMAMI_URL && (
+                <Script
+                    async={true}
+                    defer={true}
+                    src="/script.js"
+                    data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+                />
+            )}
         </html>
     );
 }
