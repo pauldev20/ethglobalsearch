@@ -41,7 +41,7 @@ export default function RootLayout({
                 <Script
                     async={true}
                     defer={true}
-                    src="/script.js"
+                    src={`${process.env.NEXT_PUBLIC_UMAMI_URL}/script.js`}
                     data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
                 />
             )}
