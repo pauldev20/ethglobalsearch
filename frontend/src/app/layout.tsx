@@ -1,11 +1,10 @@
-import { Inter as FontSans } from "next/font/google";
 import { Navbar } from "@/components/Navbar";
 import type { Metadata } from "next";
+import { Inter as FontSans } from "next/font/google";
 
 import "./globals.css";
 
 import { pageData } from "@/pageData";
-
 
 /* -------------------------------------------------------------------------- */
 /*                                    Fonts                                   */
@@ -34,8 +33,8 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${fontSans.variable} min-h-screen bg-background font-sans antialiased flex flex-col`}>
-				<Navbar />
-				{children}
+                <Navbar />
+                {children}
             </body>
         </html>
     );
