@@ -16,8 +16,12 @@ export function SearchHeader({
             {/* Header Section */}
             <div className="w-full">
                 <div className="max-w-7xl mx-auto px-6 py-6 sm:p-4">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-3">Find a Project</h1>
-                    <p className="text-lg text-muted-foreground mb-6 sm:mb-8">Check out the projects created at past events</p>
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-3">
+                        Find a Project
+                    </h1>
+                    <p className="text-lg text-muted-foreground mb-6 sm:mb-8">
+                        Check out the projects created at past events
+                    </p>
                     <Search />
                 </div>
             </div>

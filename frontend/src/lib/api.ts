@@ -157,6 +157,31 @@ export const getGraph = async (
     return data;
 };
 
+export const getGraphNext = async (
+    query: string,
+    events: string,
+    types: string,
+    organizations: string,
+    threshold: number,
+) => {
+    const response = await fetch(`/api/graph?threshold=${threshold}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            query,
+            events,
+            types,
+            organizations,
+            ...(organizations ? { sponsor_organization: organizations.split(",") } : {}),
+            ...(types ? { prize_type: types.split(",") } : {}),
+            ...(events ? { event_name: events.split(",") } : {}),
+        }),
+        next: { revalidate: 300 },
+    });
+    const data: GraphData = await response.json();
+    return data;
+};
+
 export const queryChat = async (query: string) => {
 	// Use the local Next.js API route which implements the zeroG provider
 	const response = await fetch(`/api/chat`, {
