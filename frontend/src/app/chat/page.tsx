@@ -19,7 +19,7 @@ const INITIAL_MESSAGES: Message[] = [
   {
     role: "assistant",
     content:
-      "Hello! Ask me anything about ETHGlobal projects and I'll help you find what you're looking for.",
+      "Hello! I can help you find similar projects to the ones your thinking of!",
     projects: [],
   },
 ];
@@ -72,34 +72,31 @@ export default function Chat() {
           <Card className="flex flex-col h-full py-0">
             {/* Header */}
             <div className="border-b px-6 py-4">
-              <h1 className="text-2xl font-bold">Kartik Talwar</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Ask me anything about projects
-              </p>
+              <h1 className="text-2xl font-bold">Ask Talwar</h1>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
               {messages.map((message, idx) => {
                 const isUser = message.role === "user";
 
                 return (
                   <div
                     key={idx}
-                    className={cn("flex", isUser ? "justify-end" : "justify-start")}
+                    className={cn("flex items-end gap-2", isUser ? "justify-end" : "justify-start")}
                   >
                     <div
                       className={cn(
-                        "max-w-[80%] rounded-lg px-4 py-3 text-sm",
+                        "max-w-[75%] px-4 py-2.5 text-sm shadow-sm",
                         isUser
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted",
+                          ? "bg-primary text-primary-foreground rounded-2xl rounded-br-md"
+                          : "bg-muted rounded-2xl rounded-bl-md",
                       )}
                     >
-						<RenderedText text={message.content} />
+					<RenderedText text={message.content} />
                       {!!message.projects.length && (
-                        <div className="mt-4 -mx-4 -mb-3">
-                          <div className="flex gap-3 overflow-x-auto pb-3 px-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                        <div className="mt-3 -mx-4 -mb-2.5">
+                          <div className="flex gap-3 overflow-x-auto pb-2.5 px-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                             {message.projects.map((project) => (
                               <Link
                                 key={project.uuid}
@@ -143,8 +140,8 @@ export default function Chat() {
               })}
 
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="max-w-[80%] rounded-lg px-4 py-3 bg-muted text-sm">
+                <div className="flex items-end gap-2 justify-start">
+                  <div className="max-w-[75%] rounded-2xl rounded-bl-md px-4 py-2.5 bg-muted text-sm shadow-sm">
                     Thinking…
                   </div>
                 </div>
