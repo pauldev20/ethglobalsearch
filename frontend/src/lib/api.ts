@@ -34,7 +34,7 @@ export interface Project {
     primary_repository_url: string;
     prizes: Prize[];
     score: number;
-    // biome-ignore lint/suspicious/noExplicitAny: no other way
+	// biome-ignore lint/suspicious/noExplicitAny: no other way
     highlights: { [key: string]: any };
 }
 
@@ -140,6 +140,31 @@ export const getGraph = async (
     threshold: number,
 ) => {
     const response = await fetch(`${API_URL}/graph?threshold=${threshold}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            query,
+            events,
+            types,
+            organizations,
+            ...(organizations ? { sponsor_organization: organizations.split(",") } : {}),
+            ...(types ? { prize_type: types.split(",") } : {}),
+            ...(events ? { event_name: events.split(",") } : {}),
+        }),
+        next: { revalidate: 300 },
+    });
+    const data: GraphData = await response.json();
+    return data;
+};
+
+export const getGraphNext = async (
+    query: string,
+    events: string,
+    types: string,
+    organizations: string,
+    threshold: number,
+) => {
+    const response = await fetch(`/api/graph?threshold=${threshold}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

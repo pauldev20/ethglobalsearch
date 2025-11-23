@@ -1,20 +1,26 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import GraphRenderer from "./GraphRenderer";
+import { Suspense } from "react";
+import { useState } from "react";
 
-export default async function GraphModal({
+export default function GraphModal({
     query,
     events,
     types,
     organizations,
     className,
 }: { query: string; events: string; types: string; organizations: string; className: string }) {
+	const [isOpen, setIsOpen] = useState(false);
+
     return (
         <div className={cn("flex flex-col gap-1", className)}>
             <div className="text-sm font-medium invisible">Label</div>
-            <Dialog.Root>
+            <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
                 <Dialog.Trigger asChild={true}>
                     <Button size="lg" className="cursor-pointer">
                         Open Graph
@@ -39,7 +45,9 @@ export default async function GraphModal({
                             </Dialog.Close>
                         </header>
 
-                        <GraphRenderer query={query} events={events} types={types} organizations={organizations} />
+						{isOpen && <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading graph data...</div>}>
+                        	<GraphRenderer query={query} events={events} types={types} organizations={organizations} />
+						</Suspense>}
                     </Dialog.Content>
                 </Dialog.Portal>
             </Dialog.Root>
