@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { redirect, usePathname, useSearchParams } from "next/navigation";
 import { faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -8,16 +8,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export function ClearFilters() {
 	const searchParams = useSearchParams();
   	const pathname = usePathname();
-  	const { replace } = useRouter();
 
-	const handleClick = () => {
+	const handleClick = async() => {
 		const params = new URLSearchParams(searchParams);
 		params.delete('events');
 		params.delete('types');
 		params.delete('organizations');
 		params.delete('page');
-		replace(`${pathname}?${params.toString()}`);
-		window.location.reload();
+		redirect(`${pathname}?${params.toString()}`);
 	};
 
 	return (
