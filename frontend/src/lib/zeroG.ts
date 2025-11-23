@@ -8,7 +8,8 @@ const OFFICIAL_PROVIDERS = {
     "qwen2.5-vl-72b-instruct": "0x6D233D2610c32f630ED53E8a7Cbf759568041f8f"
 };
 
-const INITIAL_FUND_AMOUNT = 0.0001;
+const INITIAL_FUND_AMOUNT = 0.05; // Initial amount to add to ledger in 0G tokens (reasonable for testnet)
+const MIN_BALANCE = 0.01; // Minimum balance required in 0G tokens (0.01 0G should be enough - most of the 0.4 0G is a reservation that gets returned)
 
 export async function expandQueryWith0G(query: string): Promise<string> {
     try {
@@ -22,14 +23,44 @@ export async function expandQueryWith0G(query: string): Promise<string> {
         const provider = new ethers.JsonRpcProvider("https://evmrpc-testnet.0g.ai");
         const wallet = new ethers.Wallet(privateKey, provider);
 
+        // Check wallet balance first (in 0G tokens)
+        const walletBalance = await provider.getBalance(wallet.address);
+        const walletBalance0G = parseFloat(ethers.formatEther(walletBalance));
+        console.log(`Wallet balance: ${walletBalance0G} 0G`);
+
         // Create Broker
         const broker = await createZGComputeNetworkBroker(wallet);
 
-        // Ensure Ledger Account
+        // Ensure Ledger Account with sufficient balance
+        let ledgerInfo;
         try {
-            await broker.ledger.getLedger();
-        } catch (error) {
-            await broker.ledger.addLedger(INITIAL_FUND_AMOUNT);
+            ledgerInfo = await broker.ledger.getLedger();
+            const currentBalance = ledgerInfo[1];
+            const balanceIn0G = parseFloat(ethers.formatEther(currentBalance));
+            
+            console.log(`Current ledger balance: ${balanceIn0G} 0G`);
+            
+            // Check if balance is sufficient
+            if (balanceIn0G < MIN_BALANCE) {
+                console.warn(`Ledger balance (${balanceIn0G.toFixed(4)} 0G) is below minimum (${MIN_BALANCE} 0G). The request may fail if insufficient funds.`);
+                // Note: To add funds to existing ledger, use the 0G dashboard or transferFund method
+                // For now, we'll proceed and let the request fail with a clear error if needed
+            }
+        } catch (error: any) {
+            // Create ledger if it doesn't exist
+            // Use a smaller amount that we can afford
+            const gasReserve = 0.005; // Reserve 0.005 0G for gas fees
+            const availableToAdd = Math.max(0, walletBalance0G - gasReserve);
+            const amountToAdd = Math.min(INITIAL_FUND_AMOUNT, availableToAdd);
+            
+            if (amountToAdd > 0.001) {
+                console.log(`Creating new ledger with ${amountToAdd.toFixed(4)} 0G...`);
+                await broker.ledger.addLedger(amountToAdd);
+                console.log(`Ledger created with ${amountToAdd.toFixed(4)} 0G`);
+            } else {
+                console.error(`Insufficient wallet balance. Need at least 0.005 0G for gas + ledger funding. Current balance: ${walletBalance0G.toFixed(4)} 0G`);
+                return query; // Fallback to original query
+            }
         }
 
         // List Services and Select Provider
@@ -50,6 +81,28 @@ export async function expandQueryWith0G(query: string): Promise<string> {
                 console.warn("Provider acknowledgement failed:", error);
                 // Continue?
             }
+        }
+
+        // Transfer funds to provider (try with available balance)
+        // Check ledger balance first to see how much we can transfer
+        try {
+            const ledgerInfo = await broker.ledger.getLedger();
+            const ledgerBalance = ledgerInfo[1];
+            const ledgerBalance0G = parseFloat(ethers.formatEther(ledgerBalance));
+            
+            // Try to transfer what we have (minimum 0.01 OG, or whatever is available)
+            const minTransfer = 0.01; // Try with minimum 0.01 OG
+            const transferAmount = ledgerBalance0G >= minTransfer 
+                ? ethers.parseEther(minTransfer.toString())
+                : ledgerBalance; // Use all available if less than minimum
+            
+            console.log(`Attempting to transfer ${ethers.formatEther(transferAmount)} 0G to provider...`);
+            await broker.ledger.transferFund(selectedProvider, "inference", transferAmount);
+            console.log(`Transferred ${ethers.formatEther(transferAmount)} 0G to provider ${selectedProvider}`);
+        } catch (error: any) {
+            // If transfer fails, continue anyway - the request will show a clear error if provider needs more funds
+            console.warn(`Transfer to provider failed or skipped: ${error.message}`);
+            // Continue - the API call will fail with a clear error if funds are insufficient
         }
 
         // Get Service Metadata

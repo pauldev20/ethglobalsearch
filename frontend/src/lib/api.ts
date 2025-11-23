@@ -92,3 +92,23 @@ export const getTypes = async () => {
 	const data: TypesResponse = await response.json();
 	return data;
 };
+
+export const chatQuery = async (query: string, page: number = 1, page_size: number = 50) => {
+	const response = await fetch("/api/chat", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			query,
+			page,
+			page_size,
+		}),
+	});
+	
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || "Failed to process chat query");
+	}
+	
+	const data: SearchResponse = await response.json();
+	return data;
+};
