@@ -1,13 +1,13 @@
 'use server'
 
-import { ChatResponse, queryChat } from "@/lib/api";
+import { ChatResponse } from "@/lib/api";
+import { getChatResponse } from "@/lib/chat-service";
 
 export const sendChatMessage = async (query: string): Promise<ChatResponse> => {
 	try {
-		const response = await queryChat(query);
-		return response;
+		return await getChatResponse(query);
 	} catch (error) {
-		console.error("Server action error:", error);
+		console.error("Server action chat error:", error);
 		throw new Error("Failed to get chat response");
 	}
-}
+};
