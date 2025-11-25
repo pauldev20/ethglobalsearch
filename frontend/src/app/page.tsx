@@ -38,7 +38,7 @@ async function FeaturedFinalists({ skeleton }: { skeleton?: boolean }) {
         );
     }
 
-    const projects = await searchProjects("", 1, 10, "ETHOnline 2025", "finalist", undefined);
+    const projects = await searchProjects("", 1, 10, "ETHGlobal Buenos Aires", "finalist", undefined);
 
     return (
         <div className="space-y-6 sm:space-y-8">
